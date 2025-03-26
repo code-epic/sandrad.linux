@@ -1,0 +1,13 @@
+[Unit]
+Description=Sandra Server CodeEpic
+After=network.target mysqld.service mongod.service
+ 
+[Service]
+User=root
+WorkingDirectory=/usr/local/sandra/
+Type=simple
+ExecStart=/usr/local/sandra/sandrad
+GuessMainPID=no
+ 
+[Install]
+WantedBy=multi-user.target
