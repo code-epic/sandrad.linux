@@ -1,0 +1,193 @@
+
+<header class="section-title">
+  <h1>API RESTFul</h1>
+</header>
+
+
+
+<div class="section">
+
+    <div class="section-separator"></div>
+
+    <h2>Definición y Conceptos de API RESTful</h2>
+    <p>
+        Una API RESTful (Representational State Transfer) es un estilo de arquitectura de software que establece un conjunto de principios para la creación de servicios web. Se basa en el concepto de recursos, donde cada recurso (por ejemplo, un usuario, un producto) se identifica de forma única a través de una URL. La comunicación entre el cliente y el servidor se realiza mediante el intercambio de representaciones de recursos en formatos como JSON o XML.
+    </p>
+
+    <h3>Principios Clave de las APIs</h3>
+    <br>
+    <table class="minimal-table">
+        <thead>
+            <tr>
+                <th>Principio</th>
+                <th>Descripción</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Cliente-Servidor</strong></td>
+                <td>La arquitectura separa la interfaz de usuario (el cliente) del almacenamiento de datos (el servidor). Esta separación permite que ambos evolucionen de forma independiente, haciendo el sistema más modular y fácil de mantener.</td>
+            </tr>
+            <tr>
+                <td><strong>Sin estado (Stateless)</strong></td>
+                <td>Cada solicitud del cliente al servidor es independiente y contiene toda la información necesaria para ser procesada. El servidor no almacena datos de sesión del cliente entre peticiones, lo que mejora la escalabilidad.</td>
+            </tr>
+            <tr>
+                <td><strong>Interfaz Uniforme</strong></td>
+                <td>
+                    Las APIs RESTful utilizan un conjunto de métodos HTTP estándar para manipular recursos. Esto crea una interfaz consistente y predecible que facilita a los desarrolladores la interacción con la API. Los métodos principales son:
+                    <ul>
+                        <li><strong><code>GET</code></strong>: Obtener un recurso.</li>
+                        <li><strong><code>POST</code></strong>: Crear un nuevo recurso.</li>
+                        <li><strong><code>PUT</code></strong>: Actualizar un recurso.</li>
+                        <li><strong><code>DELETE</code></strong>: Eliminar un recurso.</li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Sistema de Capas</strong></td>
+                <td>La comunicación entre cliente y servidor puede pasar por capas intermedias (como proxies o balanceadores de carga) sin que el cliente lo perciba. Esto aumenta la flexibilidad y permite añadir funcionalidades como seguridad o mejora de rendimiento de forma transparente.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="section-separator"></div>
+    <br><br>
+
+    <h2>¿Por qué usar JSON?</h2>
+    <p>
+        El formato JSON (JavaScript Object Notation) es la opción preferida para las API RESTful por su simplicidad y eficiencia.
+    </p>
+    <ul>
+        <li>
+            <strong>Legibilidad:</strong> Su sintaxis es fácil de leer y escribir tanto para desarrolladores como para máquinas.
+        </li>
+        <li>
+            <strong>Compatibilidad:</strong> Es un estándar de facto en la web y es compatible de forma nativa con JavaScript y la mayoría de los lenguajes de programación.
+        </li>
+        <li>
+            <strong>Eficiencia:</strong> Es un formato compacto que reduce el tamaño de los datos, mejorando el rendimiento de la red y la velocidad de procesamiento.
+        </li>
+    </ul>
+
+    <div class="section-separator"></div>
+
+    <br><br>
+    <h3>Ejemplo de Implementación de API RESTful</h3>
+    <p>
+        A continuación, se ilustra la implementación de una API usando la estructura propuesta para una operación de 
+        creación (<code>POST</code>) en el endpoint <code>v1/api/crud:{id}</code>.
+    </p>
+
+    <h4>Solicitud del Cliente (Request)</h4>
+    <p>
+        El cliente envía una petición HTTP <code>POST</code> con un cuerpo en formato JSON.
+    </p>
+    <div class="code-block">
+        <pre><code>{
+   "funcion": "Declaracion API",
+   "parametros": "",
+   "valores": {
+      "idDriver": "mongo_driver",
+      "funcion": "insertarUsuario",
+      "ruta": "/usuarios",
+      "parametros": "nombre,email",
+      "metodo": "POST",
+      "relacional": false,
+      "coleccion": "usuarios",
+      "valores": {
+         "nombre": "Juan Pérez",
+         "email": "juan.perez@example.com"
+      }
+   }
+}</code></pre>
+    </div>
+    <br><br>
+    <h4>Respuesta del Servidor (Response)</h4>
+    <p>
+        Una vez que el servidor procesa la solicitud, devuelve una respuesta JSON estructurada con una Cabecera, un Cuerpo y un Pie.
+    </p>
+    <div class="code-block">
+        <pre><code>{
+   "Cabecera": [
+      {
+         "campo": "idSolicitud",
+         "tipo": "String"
+      },
+      {
+         "campo": "estado",
+         "tipo": "String"
+      }
+   ],
+   "Cuerpo": [
+      {
+         "idSolicitud": "UUID-12345",
+         "estado": "OK"
+      }
+   ],
+   "Pie": [
+      {
+         "campo": "mensaje",
+         "valor": "Operación de inserción exitosa."
+      }
+   ]
+}</code></pre>
+    </div>
+    <ul>
+        <li>
+            <strong>Cabecera:</strong> Describe la estructura de los datos que contiene el cuerpo.
+        </li>
+        <li>
+            <strong>Cuerpo:</strong> Contiene los datos de la respuesta, como el ID de la solicitud y su estado.
+        </li>
+        <li>
+            <strong>Pie:</strong> Proporciona metadatos adicionales, como un mensaje de confirmación o de error.
+        </li>
+    </ul>
+
+    <div class="section-separator"></div>
+<br>
+    <h2>Comparación Ponderativa: JSON vs. WSDL</h2>
+    <p>
+        A continuación, se comparan las características principales de JSON (utilizado en REST) y WSDL (Web Services Description Language), que es la base de los servicios SOAP.
+    </p>
+    <table class="minimal-table">
+        <thead>
+            <tr >
+                <th>Característica</th>
+                <th>JSON (para API RESTful)</th>
+                <th>WSDL (para SOAP)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Legibilidad</strong></td>
+                <td><strong>Alta.</strong> Formato compacto y legible por humanos.</td>
+                <td><strong>Baja.</strong> Verbosidad del XML, con muchos <code>tags</code> anidados.</td>
+            </tr>
+            <tr>
+                <td><strong>Flexibilidad</strong></td>
+                <td><strong>Muy alta.</strong> Se adapta a cambios de datos fácilmente.</td>
+                <td><strong>Baja.</strong> Rígida. Un pequeño cambio en la interfaz requiere una actualización compleja.</td>
+            </tr>
+            <tr>
+                <td><strong>Velocidad</strong></td>
+                <td><strong>Muy rápido.</strong> Menor tamaño de datos y procesamiento más ágil.</td>
+                <td><strong>Más lento.</strong> La sobrecarga de XML y HTTP lo hace más pesado.</td>
+            </tr>
+            <tr>
+                <td><strong>Curva de Aprendizaje</strong></td>
+                <td><strong>Baja.</strong> Su sintaxis es intuitiva y se aprende rápidamente.</td>
+                <td><strong>Alta.</strong> Requiere comprender complejos esquemas XML y herramientas especializadas.</td>
+            </tr>
+            <tr>
+                <td><strong>Concepto</strong></td>
+                <td>Se centra en los recursos y los verbos HTTP.</td>
+                <td>Se centra en mensajes y operaciones (funciones remotas).</td>
+            </tr>
+        </tbody>
+    </table>
+    <p>
+        <strong>Conclusión:</strong> La simplicidad, flexibilidad y rapidez de JSON han superado la complejidad y rigidez de WSDL y SOAP, convirtiéndolo en el estándar de facto para el desarrollo de APIs modernas.
+    </p>
+</div>

@@ -1,0 +1,375 @@
+
+<header class="section-title">
+  <h1>La Primera Línea de Defensa: Web Application Firewall (WAF)</h1>
+</header>
+
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <p>
+        Antes de que una petición HTTP llegue a la lógica de negocio de Sandra Server, debe pasar por un guardián: el Web Application Firewall (WAF).
+    </p>
+    <blockquote>
+        Un firewall de aplicaciones web es un tipo de firewall que supervisa, filtra o bloquea el tráfico HTTP hacia y 
+        desde una aplicación web. Se diferencia de un firewall de red tradicional en que puede filtrar el contenido de aplicaciones 
+        web específicas, mientras que un firewall de red simplemente protege el tráfico entre servidores a nivel de red (Capas 3 y 4). <br><br>
+    </blockquote>
+    <p>Esta distinción es crucial. Mientras un firewall de red opera en las capas 3 (Red) y 4 (Transporte) del modelo OSI, tomando decisiones basadas en direcciones IP, puertos y protocolos (TCP/UDP), un WAF opera en la <strong>Capa 7 (Aplicación)</strong>. Esto le otorga una "visión" completa del protocolo HTTP, permitiéndole inspeccionar URLs, cabeceras, cuerpos de petición y respuestas en busca de patrones de ataque que son invisibles para un firewall de red.</p>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <h3>Historia y Evolución: La Necesidad de una Defensa Especializada</h3> <br>
+    <p>
+        Los primeros WAF comerciales surgieron a finales de la década de 1990 y principios de los 2000. Empresas pioneras como <strong>Perfecto Technologies</strong> (con su producto AppShield) y <strong>Applicure Technologies</strong> (dotDefender) se dieron cuenta de que los firewalls de red eran insuficientes para proteger la creciente complejidad de las aplicaciones web dinámicas. El tráfico malicioso ya no se limitaba a ataques a nivel de red, sino que se camuflaba dentro de peticiones HTTP aparentemente válidas.
+    </p>
+    <p>
+        El punto de inflexión llegó con la fundación de <strong>OWASP (Open Web Application Security Project)</strong> en 2001. OWASP no creó un producto, sino algo más valioso: un marco de conocimiento estandarizado y abierto sobre las vulnerabilidades de las aplicaciones web. Proyectos como el <strong>OWASP Top 10</strong> se convirtieron en la guía de referencia para desarrolladores y profesionales de la seguridad. En este contexto, el motor de WAF de código abierto <strong>ModSecurity</strong>, creado originalmente por Ivan Ristić en 2002, se convirtió en una herramienta fundamental, especialmente cuando se combinó con el <strong>OWASP Core Rule Set (CRS)</strong>, un conjunto de reglas de detección de ataques mantenido por la comunidad que se ha convertido en el estándar de facto para la defensa con WAF.
+    </p>
+
+    <br>
+    <h3>¿Qué es un Web Application Firewall (WAF)?</h3>
+    <br>
+    <p>
+        Un WAF es un tipo especializado de firewall que se sitúa entre el cliente y la aplicación web para filtrar, monitorear y bloquear el tráfico HTTP/S malicioso. A diferencia de un firewall de red tradicional, un WAF entiende el protocolo HTTP y puede analizar el contenido de las peticiones para detectar ataques comunes.
+    </p>
+    <blockquote>
+        "Un WAF opera en la Capa 7 (Aplicación) del modelo OSI, protegiendo contra fallos de seguridad específicos de las aplicaciones web que los firewalls de red no pueden detectar."
+    </blockquote>
+    <p>
+        En Sandra Server, se recomienda el uso de <strong>ModSecurity</strong> con el conjunto de reglas <strong>OWASP Core Rule Set (CRS)</strong>. Este conjunto de reglas es un estándar de la industria que protege contra una amplia gama de vulnerabilidades, incluyendo las del <a href="https://owasp.org/www-project-top-ten/" target="_blank" rel="noopener noreferrer">OWASP Top 10</a>.
+    </p>
+</div>
+
+<div class="section">
+    <p>
+        Antes de que una petición maliciosa llegue a la lógica de nuestra aplicación en Go, es fundamental contar con 
+        una primera línea de defensa robusta. Esta defensa perimetral se construye combinando un <strong>Proxy Inverso</strong> y 
+        un <strong>Web Application Firewall (WAF)</strong>, dos componentes cruciales en la arquitectura de Sandra Server.
+    </p>
+
+    
+    
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <h2>Defensa en Profundidad: De la Red a la Aplicación en Go</h2>
+    <p>
+        Si bien el WAF bloquea la mayoría de los ataques conocidos, ninguna defensa es infalible. Por ello, Sandra Server adopta un principio de <strong>"Defensa en Profundidad"</strong>, donde la seguridad también es una responsabilidad fundamental del código de la aplicación. Aquí es donde las buenas prácticas en Go se vuelven cruciales para protegerse contra inyecciones.
+    </p>
+
+    <h3>Protección contra Inyecciones en Go</h3>
+    <p>
+        Una "inyección" ocurre cuando datos no confiables (provenientes de un usuario) se envían a un intérprete como parte de un comando o consulta, engañándolo para que ejecute comandos no intencionados.
+    </p>
+
+    <h4>1. Inyección de SQL (SQLi)</h4>
+    <p><strong>Concepto:</strong> El atacante inyecta código SQL malicioso en una consulta para manipular la base de datos.</p>
+    <p><strong>Práctica Correcta en Go:</strong> La forma segura y recomendada es usar siempre <strong>consultas parametrizadas (prepared statements)</strong> a través del paquete `database/sql`. Este método separa la consulta (el código) de los datos (los parámetros), haciendo imposible que la entrada del usuario sea interpretada como código ejecutable.</p>
+    <pre class="code-block"><code>// CORRECTO: Los datos del usuario se pasan como parámetros seguros.
+rows, err := db.Query("SELECT * FROM users WHERE id = ?", userID)</code></pre>
+    
+    <p><strong>Capa de Protección de Sandra Server:</strong> En un escenario donde no se siga la práctica correcta, Sandra Server proporciona una red de seguridad. Si un programador escribiera código vulnerable concatenando directamente la entrada del usuario:</p>
+    <pre class="code-block"><code>// INCORRECTO Y VULNERABLE: Se concatena la entrada del usuario directamente.
+query := "SELECT * FROM users WHERE id = '" + userID + "'"
+rows, err := db.Query(query)</code></pre>
+    <p>... y un atacante enviara <code>' OR 1=1; --</code>, el motor de detección de inyecciones de Sandra analizaría la entrada, identificaría el patrón malicioso y <strong>bloquearía la petición</strong> antes de que llegue a la base de datos, previniendo el ataque.</p>
+
+    <h4>2. Cross-Site Scripting (XSS)</h4>
+    <p><strong>Concepto:</strong> El atacante inyecta scripts maliciosos (generalmente JavaScript) en una página web que luego son ejecutados por otros usuarios.</p>
+    <p><strong>Práctica Correcta en Go:</strong> Utilizar el paquete `html/template` para renderizar HTML. Este paquete implementa <strong>escape de salida sensible al contexto</strong> de forma automática. Sabe si una variable se está insertando en HTML, en un atributo `href`, o dentro de una etiqueta `&lt;script&gt;`, y aplica la codificación correcta para neutralizar el ataque.</p>
+    <p><strong>Capa de Protección de Sandra Server:</strong> De forma complementaria, el motor de detección analiza las entradas en busca de patrones de XSS comunes (como `&lt;script&gt;`, `onerror=`, etc.), bloqueando peticiones que intenten inyectar código malicioso.</p>
+
+    <h4>3. Inclusión de Archivos Locales (LFI)</h4>
+    <p><strong>Concepto:</strong> El atacante manipula una ruta de archivo para que la aplicación lea o ejecute un fichero no deseado en el servidor (ej: `../../etc/passwd`).</p>
+    <p><strong>Práctica Correcta en Go:</strong> Nunca construir rutas de archivo directamente con la entrada del usuario. La mejor práctica es validar la entrada contra una <strong>lista blanca (allow-list)</strong> de archivos permitidos y siempre sanear la ruta con `filepath.Clean` para resolver secuencias de escape de directorio como `../`.</p>
+    <p><strong>Capa de Protección de Sandra Server:</strong> El motor de detección está preparado para identificar y bloquear patrones de LFI en los parámetros de la URL y el cuerpo de la petición, añadiendo otra capa de defensa contra intentos de acceso no autorizado a archivos del sistema.</p>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <h2>Fortaleciendo el Ecosistema: Capa de Soporte por Petición</h2>
+    <p>
+        La arquitectura de Sandra Server va un paso más allá de la seguridad convencional al 
+        implementar una <strong>capa de soporte universal</strong> que intercepta y analiza 
+        cada petición HTTP entrante, sin importar el endpoint o el método (GET, POST, PUT, etc.). 
+        Este mecanismo actúa como un centinela a nivel de URL, garantizando que ninguna solicitud llegue a la 
+        lógica de negocio sin antes pasar por un riguroso escrutinio de seguridad.
+    </p>
+    <p>
+        Esta capa es donde el motor de detección proactiva, como la función Injection que vimos anteriormente, 
+        entra en acción. Al analizar sistemáticamente todos los datos de entrada, se crea una línea base de seguridad 
+        consistente para cada API RESTful, fortaleciendo todo el ecosistema contra amenazas comunes y emergentes.
+    </p>
+
+    <h4>Beneficios por Tipo de Petición</h4>
+    <p>
+        La siguiente tabla detalla cómo esta capa de seguridad enriquece y protege las APIs RESTful según el método HTTP utilizado:
+    </p>
+    <table class="minimal-table">
+        <thead>
+            <tr>
+                <th>Método HTTP</th>
+                <th>Datos Analizados por la Capa de Soporte</th>
+                <th>Beneficios de Seguridad para la API</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>GET</strong></td>
+                <td>Parámetros de la URL (Query String) y segmentos de la ruta.</td>
+                <td>Previene ataques de <strong>LFI</strong> y <strong>XSS reflejado</strong>. Evita que los atacantes manipulen las consultas de lectura para extraer información no autorizada o ejecutar scripts en el navegador del cliente.</td>
+            </tr>
+            <tr>
+                <td><strong>POST / PUT</strong></td>
+                <td>Cuerpo de la petición (JSON, XML, <code>x-www-form-urlencoded</code>).</td>
+                <td>Bloquea inyecciones de <strong>SQL/NoSQL</strong> y <strong>XSS almacenado</strong> que intentan corromper la base de datos o atacar a otros usuarios. Asegura la integridad de los datos que se crean o actualizan.</td>
+            </tr>
+            <tr>
+                <td><strong>Todos los Métodos</strong></td>
+                <td>Cabeceras HTTP (Headers) y la totalidad del <code>source</code> de la petición.</td>
+                <td>Detecta patrones anómalos, valida cabeceras de seguridad (como <code>Content-Type</code>), y permite un registro centralizado de intentos de ataque, fortaleciendo la postura de seguridad de todo el ecosistema.</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="section">
+    <h2>Soporte en Sandra Server: Detección Proactiva de Inyecciones</h2>
+    <p>
+        Además de las prácticas de codificación segura, Sandra Server incluye un motor de detección proactiva que inspecciona las entradas en busca de patrones de ataque conocidos. Este mecanismo, ilustrado en el siguiente código, sirve como una capa adicional de seguridad y auditoría.
+    </p>
+    <pre class="code-block"><code>// El motor de detección de Sandra Server utiliza un enfoque optimizado
+// para identificar patrones de inyección en tiempo real.
+
+var globalRegexCache = NewRegexCache()
+
+// Injection detecta múltiples tipos de inyección (SQLi, LFI, XSS) en el input.
+// Esta función optimizada usa caché de regex y valida contra todos los patrones conocidos.
+func (d *Detect) Injection(source string) *InjectionResult {
+	// Normalizar el input para una detección más efectiva y case-insensitive.
+	normalizedSource := strings.ToLower(source)
+
+	// ... (lógica de iteración sobre patrones de XSS, SQLi, etc.) ...
+
+	// Se utiliza un caché de expresiones regulares (`globalRegexCache`) para evitar
+	// la sobrecarga de compilar el mismo patrón repetidamente, mejorando el rendimiento.
+	regex := globalRegexCache.Get(pattern.Code)
+
+	if regex.MatchString(normalizedSource) {
+		return &InjectionResult{
+			Detected: true,
+			Type:     category.name,
+			// ... (detalles del resultado)
+		}
+	}
+	// ...
+	return &InjectionResult{Detected: false}
+}</code></pre>
+    <p>
+        Este motor de detección <strong>no reemplaza</strong> las buenas prácticas de programación (como las consultas parametrizadas), sino que las <strong>complementa</strong>. Su función es actuar como un sistema de alerta temprana, permitiendo registrar intentos de ataque, bloquear peticiones sospechosas antes de que lleguen a la lógica crítica, o incluso notificar a los administradores del sistema. La combinación de una defensa perimetral (WAF), un código seguro por diseño y una detección proactiva crea el ecosistema de alta seguridad que define a Sandra Server.
+    </p>
+</div>
+
+<div class="section">
+    <p>
+        La seguridad de una aplicación web no depende de una única barrera, sino de una estrategia de <strong>Defensa en Profundidad</strong>. Esta filosofía consiste en establecer múltiples capas de seguridad, de modo que si una falla, las siguientes puedan contener la amenaza. Sandra Server adopta este enfoque combinando una defensa perimetral (WAF) con una robusta capa de protección a nivel de aplicación.
+    </p>
+</div>
+
+
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <h3>Estrategias de un WAF: Listas Negras vs. Listas Blancas</h3>
+    <p>Un WAF puede operar bajo dos modelos de seguridad fundamentales, cada uno con sus propias fortalezas y debilidades.</p>
+    <table class="minimal-table">
+        <thead>
+            <tr>
+                <th>Modelo de Seguridad</th>
+                <th>Descripción</th>
+                <th>Ejemplo de Regla Conceptual</th>
+                <th>Ventajas y Desventajas</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Negativo (Lista Negra)</strong></td>
+                <td>Este es el modelo más común. El WAF utiliza un conjunto de firmas y patrones predefinidos que corresponden a ataques conocidos (como los del OWASP CRS). Cualquier petición que coincida con una de estas firmas es bloqueada.</td>
+                <td><code>SI la URL contiene "' OR 1=1" ENTONCES BLOQUEAR</code><br><code>SI el cuerpo contiene "&lt;script&gt;" ENTONCES BLOQUEAR</code></td>
+                <td><strong>Ventaja:</strong> Fácil de implementar y mantener. Ofrece una buena protección contra ataques comunes.<br><strong>Desventaja:</strong> Es reactivo. No puede proteger contra ataques de día cero (vulnerabilidades aún no conocidas) para los que no existe una firma.</td>
+            </tr>
+            <tr>
+                <td><strong>Positivo (Lista Blanca)</strong></td>
+                <td>Este modelo es mucho más restrictivo. Define un conjunto de reglas muy estrictas sobre cómo debe ser una petición válida y bloquea todo lo que no se ajuste a ese patrón. Solo se permite el tráfico explícitamente autorizado.</td>
+                <td><code>PERMITIR SI el parámetro 'userId' es un entero de 8 dígitos.</code><br><code>PERMITIR SI el método es POST y la URL es /api/login.</code></td>
+                <td><strong>Ventaja:</strong> Extremadamente seguro. Puede bloquear ataques de día cero porque no dependen de firmas de ataque conocidas.<br><strong>Desventaja:</strong> Mucho más complejo de configurar y mantener. Requiere un conocimiento profundo de la aplicación y puede generar muchos "falsos positivos" si no se ajusta correctamente.</td>
+            </tr>
+        </tbody>
+    </table>
+    <p>En la práctica, muchas implementaciones de WAF utilizan un <strong>modelo híbrido</strong>, aplicando un modelo de lista negra general y reforzándolo con reglas de lista blanca más estrictas para las partes más críticas de la aplicación.</p>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <h3>El WAF en la Arquitectura de Sandra Server</h3>
+    <p>
+        Dentro de la arquitectura de Sandra Server, el WAF se despliega típicamente como un módulo dentro del proxy inverso (por ejemplo, ModSecurity en Nginx). Su función es ser el primer punto de inspección de contenido.
+    </p>
+    <p>
+        Por ejemplo, ante un intento de inyección SQL en un campo de búsqueda (<code>/search?q=' OR 1=1;--</code>), el flujo sería:
+    </p>
+    <ol>
+        <li>La petición llega al proxy inverso.</li>
+        <li>El módulo WAF (ModSecurity) intercepta la petición HTTP.</li>
+        <li>Compara el valor del parámetro <code>q</code> contra las reglas del OWASP CRS.</li>
+        <li>Detecta una coincidencia con una regla de inyección SQL (por ejemplo, la regla 942100 que busca patrones SQLi comunes).</li>
+        <li>El WAF bloquea la petición inmediatamente, devolviendo un error <code>403 Forbidden</code> al cliente.</li>
+    </ol>
+    <p>
+        La petición <strong>nunca llega al servidor de aplicaciones Go</strong>. Esto no solo previene el ataque, sino que también ahorra recursos computacionales (CPU, memoria, conexiones a la base de datos) que se habrían consumido al procesar una petición maliciosa.
+    </p>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <h2>La Capa de Protección Interna de Sandra Server</h2>
+    <p>
+        Asumiendo que un atacante pudiera evadir el WAF, Sandra Server implementa su propia capa de seguridad que intercepta y analiza <strong>cada petición entrante</strong>. Este mecanismo actúa como un centinela a nivel de aplicación, garantizando que ninguna entrada maliciosa llegue a la lógica de negocio crítica.
+    </p>
+    <p>
+        El núcleo de esta capa es un motor de detección de inyecciones que, como se muestra en el siguiente código, utiliza un enfoque optimizado basado en expresiones regulares para identificar patrones de ataque en tiempo real.
+    </p>
+    <pre class="code-block"><code>// Injection detecta múltiples tipos de inyección (SQLi, LFI, XSS) en el input.
+// Esta función optimizada usa caché de regex y valida contra todos los patrones conocidos.
+func (d *Detect) Injection(source string) *InjectionResult {
+	// Normalizar el input para una detección más efectiva y case-insensitive.
+	normalizedSource := strings.ToLower(source)
+
+	// Lista de categorías de patrones a verificar (XSS, SQLi, LFI, etc.).
+	patternCategories := []struct {
+		name     string
+		patterns []patterns
+	}{
+		{"XSS", XSSi},
+		{"SQLi", SQLi},
+		{"LFI", LFIi},
+	}
+
+	// Iterar sobre cada categoría de ataque.
+	for _, category := range patternCategories {
+		for _, pattern := range category.patterns {
+			// Se utiliza un caché de expresiones regulares (`globalRegexCache`) para evitar
+			// la sobrecarga de compilar el mismo patrón repetidamente.
+			regex := globalRegexCache.Get(pattern.Code)
+
+			// Verificar si el patrón malicioso coincide con la entrada.
+			if regex.MatchString(normalizedSource) {
+				return &InjectionResult{
+					Detected: true,
+					Type:     category.name,
+					Pattern:  pattern.ID,
+					Message:  "Inyección detectada: " + category.name,
+				}
+			}
+		}
+	}
+
+	return &InjectionResult{Detected: false}
+}</code></pre>
+    <p>
+        Este motor es la segunda y más importante línea de defensa. Al analizar sistemáticamente todos los datos de entrada (parámetros de URL, cuerpos JSON, cabeceras), crea una línea base de seguridad consistente para cada API, fortaleciendo todo el ecosistema.
+    </p>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <h2>Análisis de Amenazas y Contramedidas</h2>
+    <p>
+        La capa de protección de Sandra Server está diseñada para neutralizar las amenazas más comunes. Es crucial entender que esta detección <strong>complementa, pero no reemplaza</strong>, las buenas prácticas de programación segura.
+    </p>
+    <table class="minimal-table">
+        <thead>
+            <tr>
+                <th>Tipo de Ataque</th>
+                <th>Ejemplo de Payload Malicioso</th>
+                <th>Cómo lo Detecta Sandra Server</th>
+                <th>Práctica de Código Segura (Obligatoria)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Inyección SQL (SQLi)</strong></td>
+                <td><code>' OR 1=1; --</code></td>
+                <td>El motor de regex busca patrones como comillas simples seguidas de operadores lógicos (<code>OR</code>, <code>AND</code>), comentarios de SQL (<code>--</code>, <code>#</code>) y palabras clave como <code>UNION SELECT</code>.</td>
+                <td>Utilizar siempre <strong>consultas parametrizadas (prepared statements)</strong>. Esto separa el código SQL de los datos, haciendo imposible que la entrada del usuario se ejecute.</td>
+            </tr>
+            <tr>
+                <td><strong>Cross-Site Scripting (XSS)</strong></td>
+                <td><code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code></td>
+                <td>Busca la presencia de etiquetas HTML como <code>&lt;script&gt;</code>, <code>&lt;img&gt;</code>, o manejadores de eventos como <code>onerror</code>, <code>onload</code>, que son indicadores clave de un intento de XSS.</td>
+                <td>Realizar un <strong>escape de salida sensible al contexto</strong>. Librerías como <code>html/template</code> en Go lo hacen automáticamente, codificando los caracteres peligrosos (<code>&lt;</code>, <code>&gt;</code>) para que el navegador los muestre como texto y no los ejecute.</td>
+            </tr>
+            <tr>
+                <td><strong>Inclusión de Archivos Locales (LFI)</strong></td>
+                <td><code>../../etc/passwd</code></td>
+                <td>Detecta secuencias de "directory traversal" como <code>../</code> o <code>..\</code>, así como rutas de archivo absolutas que intentan acceder a zonas sensibles del sistema operativo.</td>
+                <td>Validar siempre la entrada del usuario contra una <strong>lista blanca (allow-list)</strong> de archivos permitidos y sanear cualquier ruta con funciones como <code>filepath.Clean</code> para resolver secuencias de escape.</td>
+            </tr>
+        </tbody>
+    </table>
+    <p>
+        En resumen, la combinación de un WAF perimetral, una capa de detección proactiva a nivel de aplicación y un código desarrollado siguiendo prácticas seguras, crea el ecosistema de alta seguridad que define a Sandra Server.
+    </p>
+</div>
+
+<div class="section">
+    <h3>¿Qué es un Proxy Inverso?</h3> <br>
+    <p>
+        Un proxy inverso, actúa como un intermediario entre los clientes de Internet y el servidor de aplicaciones 
+        (nuestro servicio en Go). En lugar de que los clientes se comuniquen directamente con la aplicación, se comunican con el proxy, que a su vez reenvía la petición. Como afirma la documentación de Nginx: <em>"Con un proxy inverso, un servidor web puede proporcionar una serie de características que mejoran el rendimiento, la seguridad y la fiabilidad."</em>
+    </p>
+    <p>
+        Estos son los beneficios fundamentales que aporta a la arquitectura de Sandra Server:
+    </p>
+    <table class="minimal-table">
+        <thead>
+            <tr>
+                <th>Beneficio Clave</th>
+                <th>Descripción Detallada</th>
+                <th>Impacto Práctico en la Arquitectura</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Balanceo de Carga</strong></td>
+                <td>Distribuye las peticiones entrantes entre múltiples instancias del servidor de aplicaciones Go. Utiliza algoritmos (como <em>Round Robin</em> o <em>Least Connections</em>) para evitar que un único servidor se sobrecargue, permitiendo la <strong>escalabilidad horizontal</strong>.</td>
+                <td>Si una instancia de la aplicación falla, el balanceador la detecta (mediante <em>health checks</em>) y redirige el tráfico a las instancias saludables, garantizando <strong>alta disponibilidad</strong> y evitando caídas del servicio.</td>
+            </tr>
+            <tr>
+                <td><strong>Terminación SSL/TLS</strong></td>
+                <td>El proxy se encarga de la tarea computacionalmente intensiva de descifrar las peticiones HTTPS entrantes y cifrar las respuestas. La comunicación entre el proxy y los servidores Go internos puede realizarse a través de HTTP en una red privada y segura.</td>
+                <td>Libera a la aplicación Go de la gestión de certificados y del coste de procesamiento del cifrado. Esto <strong>simplifica el código de la aplicación</strong> y centraliza la gestión de la seguridad TLS en un único punto, facilitando las renovaciones y auditorías.</td>
+            </tr>
+            <tr>
+                <td><strong>Servir Contenido Estático</strong></td>
+                <td>Los proxies inversos como Nginx están altamente optimizados para servir archivos estáticos (imágenes, CSS, JS) directamente desde el disco. Esto libera al servidor de aplicaciones Go para que se concentre exclusivamente en procesar la lógica de negocio dinámica.</td>
+                <td>Una petición para <code>/assets/logo.png</code> es interceptada y servida por Nginx sin contactar al servidor Go. Esto <strong>reduce drásticamente la carga</strong> en la aplicación y entrega el contenido al usuario de forma casi instantánea, mejorando los tiempos de carga de la página.</td>
+            </tr>
+            <tr>
+                <td><strong>Ocultamiento y Seguridad</strong></td>
+                <td>Actúa como una fachada que oculta la topología de la red interna. Los clientes solo interactúan con el proxy, sin conocer las direcciones IP, los puertos o la tecnología de los servidores de aplicaciones que hay detrás.</td>
+                <td><strong>Reduce la superficie de ataque</strong>. Un atacante no puede escanear directamente los servidores de la aplicación, lo que dificulta la explotación de vulnerabilidades específicas de la plataforma o la realización de ataques dirigidos a la infraestructura interna.</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

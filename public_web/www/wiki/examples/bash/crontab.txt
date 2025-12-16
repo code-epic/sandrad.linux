@@ -1,0 +1,3 @@
+
+# Ejecutar backup diario a las 02:00
+0 2 * * * /usr/local/bin/backup.sh /var/app/data /backups >> /var/log/backup.log 2>&1

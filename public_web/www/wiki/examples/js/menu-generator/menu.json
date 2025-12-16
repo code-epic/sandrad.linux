@@ -1,0 +1,19 @@
+{
+  "items": [
+    {
+      "label": "Dashboard",
+      "path": "/",
+      "perm": "view:dashboard"
+    },
+    {
+      "label": "Usuarios",
+      "path": "/users",
+      "perm": "admin:users"
+    },
+    {
+      "label": "Métricas",
+      "path": "/metrics",
+      "perm": "view:metrics"
+    }
+  ]
+}

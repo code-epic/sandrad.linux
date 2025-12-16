@@ -1,0 +1,343 @@
+<header class="section-title">
+    <h1>Bus de Servicio Empresarial</h1>
+</header>
+
+<div class="section">
+    <p>Es una implementación del patrón de arquitectura de software ESB (Bus de Servicio Empresarial), diseñado para
+        estandarizar e integrar la comunicación entre diferentes aplicaciones en una arquitectura orientada a servicios
+        (REST). Funciona como una capa de abstracción que desacopla los sistemas, permitiendo que interactúen sin tener
+        conocimiento directo de la implementación de los demás.</p>
+    <p>Su funcionalidad principal es actuar como un intermediario que gestiona el enrutamiento, la transformación y la
+        mediación de mensajes. El CESB establece y aplica reglas de negocio centralizadas a través de APIs, garantizando
+        que la comunicación entre sistemas, tanto internos como de terceros, cumpla con las normativas y políticas de la
+        organización. Esto facilita el acceso controlado a datos específicos y el rastreo de información para resguardar
+        la integridad corporativa.</p>
+    <p>En términos de seguridad, el CESB implementa un modelo robusto que incluye el cifrado de mensajes y alertas en
+        tránsito, utilizando protocolos seguros como <strong>HTTPS</strong>. Además, gestiona el enrutamiento de
+        contenidos, la segmentación de datos entre componentes y la creación de enlaces seguros entre aplicaciones y
+        bases de datos, asegurando la confidencialidad e integridad de la información.</p>
+    <p>Como valor añadido, el CESB integra un servidor web con soporte para <strong>HTTP/2.0</strong>, lo que optimiza
+        la comunicación mediante técnicas como la multiplexación de flujos y la compresión de cabeceras. También incluye
+        un motor de generación de código que transforma interfaces gráficas HTML en código fuente, acelerando el desarrollo de
+        servicios.</p>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <h2>Sandra Server Enterprise (SSE)</h2>
+    <p>Opera como una capa de middleware que implementa el patrón de diseño de mediador. Su función es intermediar en la
+        comunicación entre un cliente y un servicio, actuando como un adaptador de protocolos y formatos de datos. Esta
+        mediación es crucial para asegurar la interoperabilidad entre sistemas heterogéneos que, de otro modo, no
+        podrían comunicarse eficazmente.</p>
+    <p>En la práctica, las aplicaciones cliente no invocan los servicios finales directamente. En su lugar, dirigen sus
+        peticiones al SSE, que se encarga de transformar la solicitud al formato y protocolo que el servicio de destino
+        espera. De manera similar, procesa la respuesta del servicio para adecuarla al cliente. Este modelo de
+        comunicación indirecta, basado en patrones predefinidos, promueve un bajo acoplamiento y una alta cohesión en la
+        arquitectura.</p>
+    <p>Como componente integral de la plataforma de middleware de CodeEpic, el SSE es fundamental para la
+        estandarización de servicios y microservicios a nivel organizacional. Al centralizar la lógica de adaptación y
+        mediación, simplifica el desarrollo de los servicios individuales y facilita la gobernanza y gestión del
+        ecosistema de aplicaciones.</p>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <h2>API (Interfaz de Programación de Aplicaciones)</h2>
+    <p>Una <strong>API (Interfaz de Programación de Aplicaciones)</strong> es un contrato formal que define cómo dos o
+        más componentes de software deben interactuar. Consiste en un conjunto de definiciones, subrutinas, protocolos y
+        herramientas que actúan como una capa de abstracción, ocultando la complejidad interna de un sistema y
+        exponiendo únicamente la funcionalidad necesaria de una manera controlada y predecible.</p>
+    <p>El propósito fundamental de una API es la reutilización de código y la modularidad. Al proporcionar un conjunto
+        de funciones de uso general, las APIs evitan que los desarrolladores tengan que reinventar la rueda,
+        permitiéndoles construir nuevas aplicaciones sobre la funcionalidad existente. Esto acelera el ciclo de
+        desarrollo y reduce la probabilidad de errores.</p>
+    <p>En el ecosistema de CodeEpic, se establece una <strong>dirección estándar</strong> para las APIs,
+        que sigue un esquema de versionado semántico (ej. <code>/v1/api/...</code>). Esta URL base actúa como el canal
+        inicial para la gestión de instrucciones y peticiones, asegurando que los clientes siempre interactúen con una
+        versión
+        específica y estable del contrato de la API.</p>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <h3>API Bajo Contexto</h3>
+    <table class="minimal-table">
+        <thead>
+            <tr>
+                <th>Atributo</th>
+                <th>Tipo de Dato</th>
+                <th>Descripción y Reglas</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>IdDriver</code></td>
+                <td><code>String</code></td>
+                <td>Definición clara de un manejador de bases de datos según el contexto.</td>
+            </tr>
+            <tr>
+                <td><code>funcion</code></td>
+                <td><code>String</code></td>
+                <td>Método de acceso como identificador en la línea de ejecución.</td>
+            </tr>
+            <tr>
+                <td><code>ruta</code></td>
+                <td><code>String</code></td>
+                <td>Cadena que permite la ejecución directa de otras APIs o la escalabilidad a otros programas.</td>
+            </tr>
+            <tr>
+                <td><code>parametros</code></td>
+                <td><code>String</code></td>
+                <td>Parámetros enriquecidos según su posición, separados por comas.</td>
+            </tr>
+            <tr>
+                <td><code>metodo</code></td>
+                <td><code>String</code></td>
+                <td>Define el tipo de petición HTTP: <code>GET</code>, <code>POST</code>, <code>PUT</code>,
+                    <code>DELETE</code>, <code>OPTIONS</code>.</td>
+            </tr>
+            <tr>
+                <td><code>migrar</code></td>
+                <td><code>Bool</code></td>
+                <td><code>True</code> para migración, <code>False</code> para no migración.</td>
+            </tr>
+            <tr>
+                <td><code>concurrencia</code></td>
+                <td><code>Bool</code></td>
+                <td><code>True</code> para concurrencia, <code>False</code> para no concurrencia.</td>
+            </tr>
+            <tr>
+                <td><code>relacional</code></td>
+                <td><code>Bool</code></td>
+                <td><strong><code>True</code></strong>: Creación por modelo ORM. <strong><code>False</code></strong>:
+                    Creación por BigData.</td>
+            </tr>
+            <tr>
+                <td><code>valores</code></td>
+                <td><code>Interface{}</code></td>
+                <td>Declaración de una clase JavaScript. Requiere <code>relacional</code> y <code>coleccion</code>.</td>
+            </tr>
+            <tr>
+                <td><code>coleccion</code></td>
+                <td><code>String</code></td>
+                <td>Nombre de la colección en MongoDB.</td>
+            </tr>
+            <tr>
+                <td><code>consulta</code></td>
+                <td><code>String</code></td>
+                <td>Incluye formatos <strong>SQL</strong> y <strong>NoSQL</strong>. Los parámetros en consultas deben
+                    empezar con <code>$</code>. Ej: <code>SELECT * FROM tablaA WHERE id = '$0'</code></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <h3>Tipos de API en la Plataforma CodeEpic</h3>
+    <table class="minimal-table">
+        <thead>
+            <tr>
+                <th>Tipo</th>
+                <th>Descripción</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Código</strong></td>
+                <td>Genera código fuente (<strong>JS</strong>, <strong>TypeScript</strong>) a partir de una interfaz
+                    gráfica HTML.</td>
+            </tr>
+            <tr>
+                <td><strong>Consulta</strong></td>
+                <td>Conecta a una base de datos (<strong>SQL</strong> o <strong>NoSQL</strong>) utilizando un driver
+                    (Postgres, SQLServer, MySQL, MongoDB).</td>
+            </tr>
+            <tr>
+                <td><strong>Interfaz</strong></td>
+                <td>Establece un puente de enlace con otros servicios API para la colaboración entre sistemas.</td>
+            </tr>
+            <tr>
+                <td><strong>Archivo</strong></td>
+                <td>Encapsula rutas de descarga de archivos (IMG, PDF, Word) mediante la API, ofreciendo seguridad con
+                    <strong>JWT</strong>.</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <h3>Métodos de Peticiones HTTP</h3>
+    <table class="minimal-table">
+        <thead>
+            <tr>
+                <th>Método</th>
+                <th>Descripción</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong><code>GET</code></strong></td>
+                <td>Solicita una representación de un recurso específico. Solo para recuperar datos.</td>
+            </tr>
+            <tr>
+                <td><strong><code>POST</code></strong></td>
+                <td>Envía una entidad a un recurso, causando a menudo un cambio en el estado.</td>
+            </tr>
+            <tr>
+                <td><strong><code>PUT</code></strong></td>
+                <td>Reemplaza todas las representaciones actuales del recurso de destino.</td>
+            </tr>
+            <tr>
+                <td><strong><code>DELETE</code></strong></td>
+                <td>Borra un recurso específico.</td>
+            </tr>
+            <tr>
+                <td><strong><code>OPTIONS</code></strong></td>
+                <td>Describe las opciones de comunicación disponibles para el recurso.</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <h3>Puntos Clave de la Arquitectura</h3>
+    <table class="minimal-table">
+        <thead>
+            <tr>
+                <th>Concepto</th>
+                <th>Descripción</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Protocolos</strong></td>
+                <td><strong>HTTP</strong> y <strong>HTTPS</strong>. Este último es la forma cifrada de comunicación
+                    entre cliente y servidor. Permite seleccionar puertos.</td>
+            </tr>
+            <tr>
+                <td><strong>Función o EndPoint</strong></td>
+                <td>Es el nombre que se le da a una API. Los endpoints son las <strong>URLs</strong> de un backend que
+                    responden a una petición. En un entorno RESTful, un mismo endpoint puede usarse con distintos
+                    verbos.</td>
+            </tr>
+            <tr>
+                <td><strong>Drivers</strong></td>
+                <td>Elemento de software que facilita la instalación y el uso de tecnologías de asistencia, como bases
+                    de datos o servidores.</td>
+            </tr>
+            <tr>
+                <td><strong>Consumidores</strong></td>
+                <td>El número máximo de usuarios permitidos para una conexión.</td>
+            </tr>
+            <tr>
+                <td><strong>Cache</strong></td>
+                <td>Los datos se alojan en distintos niveles según su frecuencia de uso. El <strong>caché
+                        inclusivo</strong> mantiene una copia en dos o más niveles de memoria.</td>
+            </tr>
+            <tr>
+                <td><strong>Entorno</strong></td>
+                <td>Los diferentes ambientes o etapas en el ciclo de vida del desarrollo de software (ej. desarrollo,
+                    producción).</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <h3>Ejemplos de APIs del Sistema</h3>
+    <table class="minimal-table">
+        <thead>
+            <tr>
+                <th>Descripción</th>
+                <th>Método</th>
+                <th>URL</th>
+                <th>Parámetros y Retornos</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Listar módulos del sistema en la carpeta <code>public_web/www/inc</code></td>
+                <td><code>GET</code></td>
+                <td><code>/v1/api/lsmodulos</code></td>
+                <td><strong>Parámetros</strong>: No aplica. <br><strong>Retorna</strong>: Array.</td>
+            </tr>
+            <tr>
+                <td>Listar archivos html del sistema en la carpeta <code>public_web/www/inc/ID</code></td>
+                <td><code>GET</code></td>
+                <td><code>/v1/api/larchivos/{id}</code></td>
+                <td><strong>Parámetros</strong>: <code>id</code> (módulo retornado por <code>lsmodulos</code>).
+                    <br><strong>Retorna</strong>: Array.</td>
+            </tr>
+            <tr>
+                <td>Procesar archivos del sistema partiendo de una dirección de archivo html.</td>
+                <td><code>POST</code></td>
+                <td><code>/v1/api/phtml</code></td>
+                <td><strong>Parámetros</strong>: <code>modulo</code>, <code>archivo</code>.
+                    <br><strong>Retorna</strong>: Array.</td>
+            </tr>
+            <tr>
+                <td>Procesar archivos html en <code>public_web/www/inc/ID</code></td>
+                <td><code>POST</code></td>
+                <td><code>/v1/api/gscript</code></td>
+                <td><strong>Parámetros</strong>: <code>modulo</code>, <code>archivo</code>.
+                    <br><strong>Retorna</strong>: Array.</td>
+            </tr>
+            <tr>
+                <td>Ejecución de tareas mediante scripts en la carpeta <code>cmd</code> del sistema</td>
+                <td><code>POST</code></td>
+                <td><code>/v1/api/sh</code></td>
+                <td><strong>Parámetros</strong>: <code>script</code>, <code>flag</code>.</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <h3>Versiones de Revisión (X.Y.Z)</h3>
+    <table class="minimal-table">
+        <thead>
+            <tr>
+                <th>Componente</th>
+                <th>Nomenclatura</th>
+                <th>Significado del Cambio</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Versión Mayor</strong></td>
+                <td><strong>X</strong>.Y.Z</td>
+                <td>Indica cambios importantes o incompatibilidad con versiones anteriores.</td>
+            </tr>
+            <tr>
+                <td><strong>Versión Menor</strong></td>
+                <td>X.<strong>Y</strong>.Z</td>
+                <td>Denota cambios en el contenido o funcionalidad, pero no una reescritura completa. Se reinicia a 0
+                    cuando la versión mayor cambia.</td>
+            </tr>
+            <tr>
+                <td><strong>Segunda Versión Menor</strong></td>
+                <td>X.Y.<strong>Z</strong></td>
+                <td>Indica correcciones sin adiciones o eliminaciones relevantes. Suele omitirse si es 0.</td>
+            </tr>
+            <tr>
+                <td><strong>Versiones Especiales</strong></td>
+                <td><code>alpha</code>, <code>beta</code>, <code>release candidate</code></td>
+                <td>Utilizadas para versiones previas a un lanzamiento oficial, denotando el estado de desarrollo (ej.
+                    <code>2.0-rc1</code>).</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,57 @@
+
+<header class="section-title">
+  <h1>Contenedor de Archivos</h1>
+</header>
+
+<p>Use almacenamiento compatible S3 (MinIO) con políticas y <em>object versioning</em>. Indexación por metadatos y hash MD5/SHA256.</p>
+
+Un Bucket (cubo o contenedor) es un concepto fundamental en los servicios de almacenamiento de objetos en la nube
+ (como AWS S3, Google Cloud Storage o Azure Blob Storage), y es el principal mecanismo utilizado para el control y la 
+ gestión de imágenes y otros archivos no estructurados.
+
+En esencia, un bucket es el contenedor lógico de nivel superior donde se guardan tus datos. Todo lo que subes 
+(una imagen, un video, un documento) se conoce como objeto y debe estar contenido en un bucket
+<br><br>
+
+<header class="section-title">
+  <h2>Sistema de Versionamiento "Sandra": Almacenamiento de Objetos con Git</h2>
+</header>
+<hr class="section-divider">
+<br>
+<p>
+  El sistema "Sandra" reinventa la gestión de archivos e imágenes al fusionar la simplicidad del almacenamiento de objetos, similar a los buckets de S3, con el potente motor de versionamiento de Git. Cada contenedor de archivos en Sandra no es solo una carpeta, sino un repositorio Git completamente funcional, tratando cada archivo como un objeto versionado.
+</p><br>
+<p>
+  Este enfoque proporciona un control de cambios granular, un historial inmutable y la capacidad de trabajar con diferentes versiones de un archivo de manera concurrente, lo cual es ideal para escenarios como la edición de imágenes, la gestión de documentos de diseño o cualquier caso donde la trazabilidad y la recuperación de versiones anteriores sean cruciales.
+</p>
+<br>
+<h3>Comparativa de Enfoques</h3>
+<p>Para entender mejor las ventajas, comparemos el método tradicional de almacenamiento en servidor con el enfoque de Sandra.</p>
+
+<table class="minimal-table">
+  <thead>
+    <tr><th>Característica</th><th>Sistema de Archivos Tradicional</th><th>Sistema "Sandra" (Basado en Git)</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>Versionamiento</strong></td><td>Manual (ej: <code>foto_v1.jpg</code>, <code>foto_final.jpg</code>). Propenso a errores y desorden.</td><td>Automático y atómico. Cada cambio genera un <code>commit</code> con un hash único (SHA-1).</td></tr>
+    <tr><td><strong>Historial</strong></td><td>Inexistente o basado en logs de servidor. No se registran los cambios de contenido.</td><td>Completo e inmutable. Se puede consultar el historial de cambios de cualquier archivo (<code>git log</code>).</td></tr>
+    <tr><td><strong>Integridad</strong></td><td>Depende de checksums manuales (MD5/SHA256).</td><td>Garantizada por Git. Cada <code>commit</code> y objeto se verifica con su hash SHA-1.</td></tr>
+    <tr><td><strong>Reversión</strong></td><td>Compleja. Requiere tener copias de seguridad manuales de versiones anteriores.</td><td>Sencilla. Se puede revertir a cualquier versión anterior usando su hash (<code>git checkout</code>).</td></tr>
+    <tr><td><strong>Trabajo Concurrente</strong></td><td>Difícil. Se corre el riesgo de sobrescribir el trabajo de otros.</td><td>Soportado a través de ramas (<code>branches</code>). Permite tener versiones "borrador" y "publicada" a la vez.</td></tr>
+  </tbody>
+</table>
+
+<h3>API Endpoints de Sandra</h3>
+<p>La interacción con los contenedores de archivos se realiza a través de una API RESTful que abstrae la complejidad de los comandos de Git.</p>
+
+<table class="minimal-table">
+  <thead>
+    <tr><th>Endpoint</th><th>Método</th><th>Descripción</th><th>Comando Git Equivalente</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>/v1/api/subirarchivos</code></td><td><code>POST</code></td><td>Sube un nuevo archivo o una nueva versión de uno existente al contenedor. Esta acción crea un nuevo <code>commit</code> en el repositorio.</td><td><code>git add &lt;archivo&gt;</code> y <code>git commit -m "..."</code></td></tr>
+    <tr><td><code>/v1/api/history/{id}</code></td><td><code>GET</code></td><td>Obtiene el historial completo de versiones (commits) para un contenedor o archivo específico identificado por <code>{id}</code>.</td><td><code>git log -- &lt;id&gt;</code></td></tr>
+    <tr><td><code>/v1/api/checkout/{id}/{hash}</code></td><td><code>GET</code></td><td>Recupera una versión específica de un archivo <code>{id}</code> correspondiente a un <code>commit</code> con un <code>{hash}</code> determinado.</td><td><code>git checkout &lt;hash&gt; -- &lt;id&gt;</code></td></tr>
+    <tr><td><code>/v1/api/checkoutbranch/{id}/{branch}</code></td><td><code>GET</code></td><td>Recupera la última versión de un archivo <code>{id}</code> desde una rama (<code>branch</code>) específica (ej: <code>main</code>, <code>desarrollo</code>).</td><td><code>git checkout &lt;branch&gt; -- &lt;id&gt;</code></td></tr>
+  </tbody>
+</table>

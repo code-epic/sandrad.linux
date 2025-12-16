@@ -1,0 +1,141 @@
+
+<header class="section-title">
+  <h1>Motor de Generación de Códigos QR</h1>
+</header>
+
+<div class="section">
+    <p>
+        Sandra Server integra un <strong>potente motor para la generación de códigos QR</strong>, accesible a través de una API RESTful. Este servicio no es una librería externa, sino una capacidad nativa de la plataforma, diseñada para ofrecer una solución centralizada, segura y flexible para la creación de códigos QR dinámicos.
+    </p>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <h2>Concepto e Historia del Código QR</h2>
+    <p>
+        Un código QR (del inglés <em>Quick Response</em>, "respuesta rápida") es la evolución del código de barras tradicional. Se trata de un código bidimensional que puede almacenar una cantidad significativamente mayor de información, desde URLs y texto hasta datos de contacto. Su diseño, basado en una matriz de puntos, permite una lectura omnidireccional a alta velocidad, lo que lo hace ideal para interacciones rápidas con dispositivos móviles.
+    </p>
+    <p>
+        Fue inventado en <strong>1994</strong> por la compañía japonesa <strong>Denso Wave</strong>, una subsidiaria de Toyota. Su propósito original no era el marketing, sino mejorar la eficiencia en la industria automotriz.
+    </p>
+    <blockquote>
+        "El código QR fue desarrollado para permitir el escaneo de componentes a alta velocidad durante el proceso de fabricación de vehículos, superando las limitaciones de los códigos de barras existentes."
+    </blockquote>
+    <p>
+        Gracias a que Denso Wave liberó la patente, su uso se expandió globalmente y hoy está estandarizado bajo la norma <strong>ISO/IEC 18004</strong>, lo que garantiza su compatibilidad y fiabilidad en todo el mundo.
+    </p>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <h2>Beneficios de un Motor de QR Centralizado</h2>
+    <p>
+        Utilizar el motor de QR de Sandra Server en lugar de librerías en el lado del cliente ofrece ventajas estratégicas:
+    </p>
+</div>
+
+<div class="section">
+    <h2>Casos de Uso y Actividades Recomendadas</h2>
+    <p>El motor de QR de Sandra Server es lo suficientemente flexible para soportar una amplia gama de actividades de negocio:</p>
+    <table class="minimal-table">
+        <thead>
+            <tr>
+                <th>Caso de Uso</th>
+                <th>Descripción de la Actividad</th>
+                <th>Ejemplo de Parámetro <code>ruta</code></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Verificación de Documentos</strong></td>
+                <td>Generar un QR en facturas, certificados o contratos que enlace a una página de verificación segura para confirmar la autenticidad del documento.</td>
+                <td><code>https://api.sandra.com/verify?docId=...</code></td>
+            </tr>
+            <tr>
+                <td><strong>Marketing y Seguimiento</strong></td>
+                <td>Crear QRs para campañas publicitarias que incluyan parámetros de seguimiento (UTM) para medir la efectividad de cada canal (impreso, web, etc.).</td>
+                <td><code>https://landing.sandra.com/?utm_source=flyer</code></td>
+            </tr>
+            <tr>
+                <td><strong>Control de Acceso a Eventos</strong></td>
+                <td>Generar un QR único por cada entrada vendida. Al escanearlo en la puerta, se valida contra la base de datos para permitir o denegar el acceso.</td>
+                <td><code>https://checkin.sandra.com/validate?ticket=...</code></td>
+            </tr>
+            <tr>
+                <td><strong>Descarga de Archivos Segura</strong></td>
+                <td>El QR enlaza a un endpoint de descarga de archivos de Sandra Server, que primero valida el token del usuario antes de servir el fichero.</td>
+                <td><code>/v1/api/download?fileId=...&token=...</code></td>
+            </tr>
+        </tbody>
+    </table>
+    </p>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <h2>Endpoint: <code>POST /v1/api/makeqr</code></h2>
+    <p>
+        Este endpoint es el núcleo del servicio de generación de QR. Recibe un cuerpo de solicitud en formato JSON para configurar el código QR a generar y el formato de la respuesta.
+    </p>
+
+    <h4>Parámetros de la Petición</h4>
+    <p>
+        La petición debe enviar un cuerpo JSON con la siguiente estructura, que corresponde al struct de Go utilizado en el backend:
+    </p>
+    <pre class="code-block"><code>{
+ id: string
+ ruta: string
+ tipo: string
+}</code></pre>
+    <p>
+        Los campos del JSON se describen a continuación:
+    </p>
+    <table class="minimal-table">
+        <thead>
+            <tr>
+                <th>Parámetro</th>
+                <th>Descripción</th>
+                <th>Ejemplo</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>id</strong></td>
+                <td>Un identificador único para la solicitud o el contenido que se está codificando. Puede ser usado para logging, auditoría o para nombrar el archivo resultante.</td>
+                <td><code>factura-00123</code></td>
+            </tr>
+            <tr>
+                <td><strong>ruta</strong></td>
+                <td>El contenido principal que se codificará en el código QR. Generalmente es una URL a la que el usuario será redirigido al escanear el código.</td>
+                <td><code>https://mi-empresa.com/verificar/factura-00123</code></td>
+            </tr>
+            <tr>
+                <td><strong>tipo</strong></td>
+                <td>Define el formato de la respuesta. El servidor puede devolver el QR como una imagen directa o como una cadena de texto codificada.</td>
+                <td><code>png</code> o <code>base64</code></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h4>Formatos de Respuesta</h4>
+    <ul>
+        <li><strong><code>png</code></strong>: Si se especifica <code>tipo=png</code>, el servidor responderá con una imagen en formato PNG. El navegador la interpretará como una descarga de archivo o la mostrará directamente, dependiendo de las cabeceras de respuesta (<code>Content-Type: image/png</code>).</li>
+        <li><strong><code>base64</code></strong>: Si se especifica <code>tipo=base64</code>, el servidor responderá con un objeto JSON que contiene la imagen del QR codificada en formato Base64. Este formato es ideal para embeber la imagen directamente en una etiqueta <code>&lt;img&gt;</code> en HTML sin necesidad de una solicitud de archivo adicional (ej: <code>&lt;img src="data:image/png;base64,..."&gt;</code>).</li>
+    </ul>
+
+    <h4>Ejemplo de Petición</h4>
+    <p>Para generar un QR que enlace a una URL y se devuelva como una imagen PNG, se enviaría una petición <code>POST</code> con el siguiente cuerpo JSON:</p>
+    <pre class="code-block"><code>POST /v1/api/makeqr
+Content-Type: application/json
+
+{
+  "id": "doc-456",
+  "ruta": "https://api.sandra.com/docs/456",
+  "tipo": "png"
+}
+</code></pre>
+    <p>El servidor respondería con la imagen del código QR, que al ser escaneada, dirigiría al usuario a la URL especificada.</p>
+</div>

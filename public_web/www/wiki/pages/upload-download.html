@@ -1,0 +1,275 @@
+<header class="section-title">
+  <h1>Subir y descargar archivos</h1>
+</header>
+
+<div class="section">
+  <p>
+    Este manual detalla el uso del servicio de subida de archivos, incluyendo su implementación, los objetos clave
+    involucrados, y ejemplos de cómo consumirlo desde diferentes lenguajes de programación.
+  </p>
+</div>
+
+<div class="section">
+  <h2>1. Resumen del Servicio</h2>
+  <p>
+    El servicio de subida de archivos está diseñado para recibir uno o más archivos a través de una solicitud
+    <strong>HTTP POST</strong> con <code>multipart/form-data</code>. La API procesa los archivos, los guarda en un
+    directorio temporal y devuelve una respuesta en formato JSON.
+  </p>
+</div>
+
+<div class="section">
+  <h2>2. Flujo de Subida de Archivos</h2>
+  <p>
+    A continuación, se presenta un diagrama de flujo que ilustra el proceso completo de subida de archivos, desde el
+    cliente hasta el servidor.
+  </p>
+  <pre  class="code-block"><code>graph TD
+      subgraph Cliente
+          A[Selección de Archivo] --> B[Creación de FormData];
+          B --> C[Envío de Solicitud HTTP POST];
+      end
+      subgraph Servidor API en Go
+          C --> D{Manejo de Solicitud};
+          D --> E{Validación de Token};
+          E --> F[Parseo de `multipart/form-data`];
+          F --> G[Creación de Directorio Temporal];
+          G --> H1{Opción Git Activa?};
+          H1 -- NO --> H[Iteración sobre Archivos];
+          H1 -- SÍ --> I1[Inicializar/Cargar Repo Git go-git];
+          I1 --> J1[Git: Añadir Archivos al Staging];
+          J1 --> H; 
+          H --> I[Apertura de Archivo];
+          I --> J[Creación de Archivo en Servidor];
+          J --> K[Copia de Contenido];
+          K --> L1{Opción Git Activa?};
+          L1 -- SÍ --> M1[Git: Commit con Log de Usuario];
+          M1 --> L[Mapeo de Nombres de Archivo];
+          L1 -- NO --> L;
+          L --> N[Respuesta JSON];
+      end
+      N --> C[Respuesta del Servidor al Cliente];</code></pre>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+  <h2>3. Conceptos Clave</h2>
+
+  <h3><code>multipart/form-data</code></h3>
+  <p>
+    Es un tipo de contenido (<code>Content-Type</code>) que se utiliza en las solicitudes HTTP para enviar datos que no
+    se pueden representar en un formato simple, como archivos binarios (imágenes, documentos, etc.) junto con datos de
+    texto. El cliente empaqueta cada archivo y campo de texto en "partes" separadas dentro de la solicitud.
+  </p>
+
+  <h3><code>FormData</code> (en JavaScript/Angular)</h3>
+  <p>
+    Es una interfaz que permite construir un conjunto de pares clave/valor para enviar datos a través de una solicitud
+    HTTP, especialmente útil para enviar archivos. Es la contraparte del lado del cliente de
+    <b>multipart/form-data</b>. Se pueden agregar campos con el método <b>.append()</b>, donde el primer
+    argumento es la clave (por ejemplo, "archivos") y el segundo es el valor (el archivo en sí).
+  </p>
+
+  <h3><code>r.ParseMultipartForm(32 << 20)</code> (en Golang)</h3>
+  <p>
+    Es la función en Go que procesa la solicitud <b>multipart/form-data</b>. El argumento <b>32 << 20</b>
+    (que es equivalente a 32 MB) establece el límite de memoria que el servidor usará para almacenar los datos del
+    formulario. Si el tamaño de la solicitud supera este límite, el resto se guardará temporalmente en el disco del
+    servidor.
+  </p>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+  <h2>4. Implementación del Cliente</h2>
+  <p>
+    El cliente debe construir un objeto <code>FormData</code> y enviarlo al endpoint del servicio.
+  </p>
+
+  <h3>Objetos Clave y <code>FormData</code></h3>
+  <p>
+    El servicio espera los siguientes campos en la solicitud <code>FormData</code>:
+  </p>
+
+  <table class="minimal-table">
+    <thead>
+      <tr>
+        <th>Campo</th>
+        <th>Descripción Detallada</th>
+        <th>Obligatorio</th>
+        <th>Ejemplo de Valor</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong><code>archivos</code></strong></td>
+        <td>Contiene el archivo o los archivos binarios a subir. Es fundamental que la clave del formulario coincida con la que espera el servidor (<code>frm.File["archivos"]</code>). En HTML, esto corresponde al atributo <code>name</code> de la etiqueta <code>&lt;input type="file"&gt;</code>.</td>
+        <td>Sí</td>
+        <td>El contenido de un archivo seleccionado por el usuario.</td>
+      </tr>
+      <tr>
+        <td><strong><code>identificador</code></strong></td>
+        <td>Una cadena de texto única que se utiliza para crear un directorio específico en el servidor. Esto permite organizar los archivos por usuario, sesión o transacción, evitando colisiones de nombres.</td>
+        <td>Sí</td>
+        <td><code>user-123</code>, <code>proyecto-alpha</code>, <code>sesion-xyz789</code></td>
+      </tr>
+      <tr>
+        <td><strong><code>git</code></strong></td>
+        <td>Un campo opcional que, si se establece en <code>"true"</code>, activa el sistema de versionamiento "Sandra". El servidor tratará el directorio del <code>identificador</code> como un repositorio Git, creando un <em>commit</em> por cada subida. Ideal para versionar imágenes, diseños o documentos.</td>
+        <td>No</td>
+        <td><code>true</code></td>
+      </tr>
+      <tr>
+        <td><strong><code>return</code></strong></td>
+        <td>Un campo opcional que, si se establece en <code>"true"</code>, modifica la respuesta del servidor. En lugar de un mensaje genérico, la API devolverá el nombre único del directorio creado, lo cual es útil para referencias futuras.</td>
+        <td>No</td>
+        <td><code>true</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <br><br>
+  <h3>Ejemplo de FormData en Angular</h3>
+  <p>
+    El formulario HTML en el ejemplo del usuario (<b> form </b>) utiliza los nombres correctos
+    (<b>identificador</b> y <b>archivos</b>). La función <b>SubirArchivo</b> en el componente de
+    Angular crea el <b>FormData</b> directamente a partir de este formulario.
+  </p>
+  <pre  class="code-block"><code>
+async SubirArchivo(e, posicion) {
+  // Crea un objeto FormData a partir de los elementos del formulario HTML
+  var frm = new FormData(document.forms.namedItem("forma"));
+
+  // Llama al servicio para enviar el FormData
+  await this.apiService.EnviarArchivosProgress(frm).subscribe({
+    // ...
+  });
+}</code></pre>
+  <p>
+    Este enfoque simplifica el proceso, ya que el navegador se encarga de empaquetar los campos del formulario,
+    incluyendo el archivo, en un FormData listo para ser enviado.
+  </p>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+  <h2>5. Ejemplos de Subida de Archivos</h2>
+  <p>
+    A continuación, se muestran ejemplos de cómo consumir este servicio utilizando diferentes lenguajes de programación.
+  </p>
+
+  <h3>Ejemplo en Python (usando la librería <code>requests</code>)</h3>
+  <p>
+    Este ejemplo utiliza la librería <code>requests</code>, que es un estándar de facto para realizar solicitudes HTTP
+    en Python.
+  </p>
+  <pre  class="code-block"><code>import requests
+# URL del servicio
+url = "http://localhost:8080/api/v1/subirarchivos"
+
+# Ruta del archivo a subir
+archivo_a_subir = "/ruta/a/tu/documento.pdf"
+
+# Parámetros del formulario
+datos = {
+    'identificador': 'tu_identificador_unico'
+}
+
+# Abrir el archivo en modo binario
+with open(archivo_a_subir, 'rb') as archivo:
+    # Crear el diccionario de archivos para 'requests'
+    # La clave 'archivos' debe coincidir con el nombre esperado por la API en Go
+    archivos = {
+        'archivos': (archivo_a_subir.split('/')[-1], archivo)
+    }
+
+    # Encabezados de la solicitud (incluyendo el token de autorización)
+    headers = {
+        'Authorization': 'Bearer TU_TOKEN_DE_ACCESO'
+    }
+
+    # Realizar la solicitud POST
+    try:
+        respuesta = requests.post(url, data=datos, files=archivos, headers=headers)
+
+        # Imprimir la respuesta
+        if respuesta.status_code == 200:
+            print("Archivo subido exitosamente.")
+            print("Respuesta del servidor:", respuesta.json())
+        else:
+            print(f"Error al subir el archivo. Código de estado: {respuesta.status_code}")
+            print("Respuesta del servidor:", respuesta.text)
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error de conexión: {e}")</code></pre>
+  <h3>Ejemplo en Flutter (usando la librería <code>http</code>)</h3>
+  <p>
+    Este ejemplo utiliza la librería <code>http</code> para realizar una solicitud <code>multipart</code>.
+  </p>
+  <pre  class="code-block"><code>import 'dart:io';
+import 'package:http/http.dart' as http;
+
+Future&lt;void&gt; subirArchivoFlutter(String filePath, String identificador, String token) async {
+  var uri = Uri.parse('http://localhost:8080/api/v1/subirarchivos');
+
+  // Crear una solicitud multipart
+  var request = http.MultipartRequest('POST', uri)
+    ..headers['Authorization'] = 'Bearer $token';
+
+  // Añadir campos de texto
+  request.fields['identificador'] = identificador;
+
+  // Añadir el archivo
+  // La clave 'archivos' debe coincidir con el nombre esperado por la API en Go
+  request.files.add(
+    await http.MultipartFile.fromPath(
+      'archivos',
+      filePath,
+    ),
+  );
+
+  // Enviar la solicitud
+  try {
+    var response = await request.send();
+
+    // Leer la respuesta
+    if (response.statusCode == 200) {
+      String responseBody = await response.stream.bytesToString();
+      print('Archivo subido exitosamente: $responseBody');
+    } else {
+      print('Error al subir el archivo. Código de estado: ${response.statusCode}');
+      String responseBody = await response.stream.bytesToString();
+      print('Respuesta del servidor: $responseBody');
+    }
+  } catch (e) {
+    print('Error de conexión: $e');
+  }
+}
+
+// Ejemplo de uso:
+// subirArchivoFlutter('/ruta/a/tu/documento.pdf', 'identificador123', 'TU_TOKEN_DE_ACCESO');</code></pre>
+
+  <h3>Ejemplo con <code>cURL</code> (desde la terminal)</h3>
+  <p>
+    <code>cURL</code> es una herramienta de línea de comandos muy útil para probar APIs. Este comando simula una
+    solicitud <code>multipart/form-data</code>.
+  </p>
+  <pre  class="code-block"><code>curl -X POST \
+      -H "Authorization: Bearer TU_TOKEN_DE_ACCESO" \
+      -F "identificador=tu_identificador_unico" \
+      -F "archivos=@/ruta/a/tu/documento.pdf" \
+      http://localhost:8080/api/v1/subirarchivos
+        </code></pre>
+  <p><strong>Explicación del comando <code>curl</code>:</strong></p>
+  <ul>
+    <li><code>-X POST</code>: Especifica el método HTTP como POST.</li>
+    <li><code>-H "Authorization:..."</code>: Añade el encabezado de autorización.</li>
+    <li><code>-F "identificador=..."</code>: Añade el campo de formulario <code>identificador</code>.</li>
+    <li><code>-F "archivos=@..."</code>: Añade el campo de formulario <code>archivos</code> y especifica la ruta del
+      archivo a subir. El <code>@</code> le dice a curl que debe leer el contenido del archivo en la ruta especificada.
+    </li>
+  </ul>
+</div>

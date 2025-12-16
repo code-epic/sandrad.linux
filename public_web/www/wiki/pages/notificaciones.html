@@ -1,0 +1,297 @@
+<header class="section-title">
+  <h1>Notificaciones & Alertas</h1>
+</header>
+
+<div class="section">
+  <p>
+    La plataforma Sandra Server ofrece un robusto sistema de notificaciones que va más allá de las alertas en la
+    aplicación. Implementa el estándar <strong>Web Push</strong>, que permite a una aplicación web enviar notificaciones
+    a un usuario incluso cuando este no tiene el sitio web abierto. Esto se logra a través de <strong>Service
+      Workers</strong>, scripts que el navegador ejecuta en segundo plano, y un sistema de alertas tempranas basado en
+    reglas de negocio.
+  </p>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+  <h2>Arquitectura de Notificaciones Web Push</h2>
+  <p>
+    El protocolo Web Push involucra tres actores principales: la aplicación cliente (navegador), un <strong>Push
+      Service</strong> (un intermediario proporcionado por el fabricante del navegador, como Google o Mozilla) y nuestro
+    servidor de aplicaciones (Sandra Server). Para que nuestro servidor pueda identificarse de forma segura ante el Push
+    Service, utiliza el estándar <strong>VAPID</strong>.
+  </p>
+
+  <h3>¿Qué es VAPID y para qué sirve?</h3>
+  <p>
+    <strong>VAPID (Voluntary Application Server Identification)</strong> es una especificación (RFC 8292) que permite a
+    un servidor de aplicaciones identificarse de forma segura ante un Push Service. Funciona mediante un par de claves
+    criptográficas (pública y privada):
+  </p>
+  <ul>
+    <li><strong>Clave Privada:</strong> Se mantiene secreta en Sandra Server. Se utiliza para firmar cada notificación
+      push que se envía.</li>
+    <li><strong>Clave Pública:</strong> Se comparte con el cliente (navegador). Cuando el cliente se suscribe a las
+      notificaciones, le presenta esta clave pública al Push Service, indicándole que solo debe aceptar notificaciones
+      firmadas por la clave privada correspondiente.</li>
+  </ul>
+  <p>
+    El uso de VAPID es fundamental porque elimina la necesidad de registrarse en plataformas específicas de cada
+    proveedor (como el antiguo Firebase Cloud Messaging), proporcionando un método estándar y universal para autenticar
+    las notificaciones.
+  </p>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+  <h2>Flujo de Comunicación y Endpoints Clave</h2>
+  <p>El proceso de suscripción y envío de notificaciones se orquesta a través de tres endpoints principales en Sandra
+    Server.</p>
+  <table style="width: 100%; border: none;">
+    <tr style="background-color: transparent;">
+      <td style="width: 50%; vertical-align: top; padding-right: 15px;">
+        <pre class="code-block"><code>graph TD
+    subgraph Frontend (Navegador)
+        A[1. Pide Clave VAPID] --> B(Backend);
+        C[3. Pide Permiso al Usuario];
+        D[4. Se suscribe al Push Service] --> E{PushSubscription};
+        F[5. Envía Suscripción al Backend] --> G(Backend);
+    end
+
+    subgraph Backend (Sandra Server)
+        B -- 2. Devuelve Clave Pública --> A;
+        G -- 6. Almacena Suscripción en MongoDB --> H[DB: MongoDB];
+        I[7. Evento de Notificación] --> J[8. Prepara y Firma Mensaje];
+        J -- 9. Envía a Push Service --> K;
+    end
+
+    subgraph "Infraestructura Push"
+        K[Push Service] -- 10. Entrega Notificación --> L[Dispositivo del Usuario];
+    end
+</code></pre>
+      </td>
+      <td style="width: 50%; vertical-align: top; padding-left: 15px;">
+        <a href="assets/img/webpush.png" target="_blank" title="Haz clic para ampliar la imagen">
+          <img src="assets/img/webpush.png" alt="Diagrama de Flujo de Web Push" style="width: 100%; cursor: pointer; border-radius: 8px;">
+        </a>
+      </td>
+    </tr>
+  </table>
+
+  <table class="minimal-table">
+    <thead>
+      <tr>
+        <th>Endpoint</th>
+        <th>Método</th>
+        <th>Descripción Técnica</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>/v1/api/wpush/vpk</code></td>
+        <td><code>GET</code></td>
+        <td><strong>Obtener Clave Pública VAPID:</strong> El frontend llama a este endpoint para obtener la clave
+          pública VAPID del servidor. Esta clave es necesaria para que el navegador pueda solicitar una suscripción al
+          Push Service en nombre de nuestra aplicación.</td>
+      </tr>
+      <tr>
+        <td><code>/v1/api/wpush/subscribe</code></td>
+        <td><code>POST</code></td>
+        <td><strong>Registrar Suscripción:</strong> Una vez que el usuario acepta los permisos, el navegador genera un
+          objeto <code>PushSubscription</code> (que contiene la URL del Push Service y las claves para el cifrado). El
+          frontend envía este objeto JSON al backend, que lo almacena en MongoDB, asociándolo con el ID del usuario.
+        </td>
+      </tr>
+      <tr>
+        <td><code>/v1/api/wpush/send</code></td>
+        <td><code>POST</code></td>
+        <td><strong>Enviar Notificación:</strong> Este endpoint es utilizado por otros servicios del backend o un panel
+          de administración para iniciar el envío de una notificación. Recibe un cuerpo JSON que especifica el
+          destinatario (<code>userId</code>, <code>groupId</code> o <code>campaignId</code>) y el contenido del mensaje.
+          El manejador busca las suscripciones en MongoDB, construye el payload y lo envía al Push Service
+          correspondiente, firmando la petición con la clave privada VAPID.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+  <h2>Generación de Claves VAPID</h2>
+  <p>
+    Las claves VAPID (pública y privada) son la identidad de tu servidor de aplicaciones y deben generarse <strong>una
+      sola vez</strong>. La clave privada debe almacenarse de forma segura en las variables de entorno de tu servidor y
+    nunca debe exponerse, mientras que la clave pública se enviará a los clientes a través del endpoint
+    <code>/v1/api/wpush/vpk</code>.
+  </p>
+  <p>
+    A continuación, se muestran ejemplos de cómo generar este par de claves. Este es un proceso que se realiza una
+    única vez durante la configuración del proyecto.
+  </p>
+
+  <h4>Node.js (usando la librería <code>web-push</code>)</h4>
+  <p>La forma más sencilla es usar el CLI que proporciona la librería <code>web-push</code>.</p>
+  <pre class="code-block"><code># 1. Instalar web-push globalmente o usar npx
+npm install -g web-push
+
+# 2. Ejecutar el comando para generar las claves
+web-push generate-vapid-keys
+
+# =======================================
+# Salida:
+# Public Key:
+# BEl62i_2...
+# Private Key:
+# _R-3_tT...
+# =======================================
+</code></pre>
+
+  <h4>Python (usando la librería <code>py_vapid</code>)</h4>
+  <p>Esta librería proporciona una herramienta de línea de comandos para la generación de claves.</p>
+  <pre class="code-block"><code># 1. Instalar la librería
+pip install py-vapid
+
+# 2. Generar las claves
+vapid --gen
+
+# =======================================
+# Salida:
+# private_key = "..."
+# public_key = "..."
+# =======================================
+</code></pre>
+
+  <p>Guarda estas claves en un lugar seguro, como las variables de entorno de tu aplicación, para que el servidor
+    pueda usarlas al firmar las notificaciones.</p>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+  <h2>Identificación Única del Cliente (UUID)</h2>
+  <p>
+    Para que el servidor pueda enviar notificaciones dirigidas a un usuario o dispositivo específico, es crucial asociar
+    cada <code>PushSubscription</code> con un identificador único. Este es el propósito del campo <code>userId</code> en
+    el modelo de datos de MongoDB. Si bien un usuario autenticado ya tiene un ID, para usuarios anónimos o para
+    identificar un navegador específico, podemos generar y persistir un <strong>Identificador Único Universal
+      (UUID)</strong> directamente en el cliente.
+  </p>
+  <p>
+    El siguiente ejemplo práctico muestra una función compatible con navegadores para generar un UUID v4. Esta función
+    verifica si ya existe un ID en el <code>localStorage</code> del navegador; si no, genera uno nuevo y lo guarda.
+    Esto asegura que el mismo navegador mantenga el mismo ID entre sesiones.
+  </p>
+
+  <h4>Ejemplo Práctico en TypeScript/JavaScript</h4>
+  <p>Este código puede ser parte de un servicio en Angular, Vue o cualquier aplicación JavaScript.</p>
+  <pre class="code-block"><code>/**
+ * Genera o recupera un UUID v4 para identificar de forma única al cliente/navegador.
+ * Persiste el ID en localStorage para mantenerlo entre sesiones.
+ * @returns {string} El UUID v4 del cliente.
+ */
+function getClientId(): string {
+  let id = localStorage.getItem('userId');
+  if (!id) {
+    // Generador de UUID v4 compatible con todos los navegadores.
+    id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+    localStorage.setItem('userId', id);
+  }
+  return id;
+}</code></pre>
+  <p>Este ID generado es el que se debe enviar al backend junto con el objeto de suscripción al llamar al endpoint
+    <code>/v1/api/wpush/subscribe</code>, permitiendo así la segmentación y el envío de notificaciones dirigidas.</p>
+</div>
+
+<div class="section">
+  <h2>Gestión de Campañas y Mensajes con MongoDB</h2>
+  <p>
+    La flexibilidad de MongoDB como base de datos NoSQL es ideal para gestionar las suscripciones y las campañas de
+    notificaciones.
+  </p>
+
+  <h4>Modelo de Datos en MongoDB</h4>
+  <p>Se pueden utilizar dos colecciones principales:</p>
+  <ol>
+    <li><strong><code>push_subscriptions</code></strong>: Almacena la información de cada suscripción.</li>
+    <pre class="code-block"><code>{
+  "_id": ObjectId("..."),
+  "userId": "user-123",
+  "subscription": {
+    "endpoint": "https://fcm.googleapis.com/fcm/send/...",
+    "expirationTime": null,
+    "keys": {
+      "p256dh": "...",
+      "auth": "..."
+    }
+  },
+  "createdAt": ISODate("...")
+}</code></pre>
+    <li><strong><code>push_campaigns</code></strong>: Define las campañas, permitiendo mensajes dinámicos y
+      segmentación.</li>
+    <pre class="code-block"><code>{
+  "_id": ObjectId("..."),
+  "campaignName": "Oferta de Verano 2024",
+  "targetGroup": "clientes_vip", // Segmento de usuarios
+  "messageTemplate": {
+    "title": "¡Hola, {{user.name}}! Tenemos una oferta para ti",
+    "body": "Disfruta de un 20% de descuento en tu próxima compra.",
+    "icon": "/assets/icons/icon-96x96.png",
+    "data": { "url": "/ofertas/verano" }
+  },
+  "scheduledAt": ISODate("..."),
+  "status": "pending" // pending, sending, completed
+}</code></pre>
+  </ol>
+  <p>
+    Cuando se ejecuta una campaña, el backend puede buscar todos los usuarios del grupo <code>clientes_vip</code>,
+    obtener sus suscripciones de <code>push_subscriptions</code>, personalizar el mensaje con sus datos (ej. reemplazar
+    <code>{{user.name}}</code>) y enviar las notificaciones.
+  </p>
+
+  <h4>Diseño de Campañas de Notificaciones</h4>
+  <p>Para que las notificaciones sean efectivas y no intrusivas, es crucial un buen diseño de campaña.</p>
+  <table class="minimal-table">
+    <thead>
+      <tr>
+        <th>Principio</th>
+        <th>Descripción</th>
+        <th>¿Cuándo Usarlo?</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Segmentación</strong></td>
+        <td>No enviar el mismo mensaje a todos. Agrupar usuarios por comportamiento, intereses o demografía.</td>
+        <td>Siempre. Es la base de la relevancia.</td>
+      </tr>
+      <tr>
+        <td><strong>Personalización</strong></td>
+        <td>Usar datos del usuario (nombre, historial de compras) para hacer el mensaje más personal y relevante.</td>
+        <td>En mensajes transaccionales y de marketing para aumentar la conexión.</td>
+      </tr>
+      <tr>
+        <td><strong>Relevancia y Oportunidad</strong></td>
+        <td>Enviar el mensaje en el momento adecuado. Una notificación de "carrito abandonado" es útil una hora después,
+          no un día después.</td>
+        <td>Para notificaciones basadas en acciones del usuario (transaccionales).</td>
+      </tr>
+      <tr>
+        <td><strong>Llamada a la Acción (CTA) Clara</strong></td>
+        <td>Indicar claramente qué se espera que haga el usuario. "Ver oferta", "Completar compra".</td>
+        <td>En todas las notificaciones que busquen una interacción.</td>
+      </tr>
+      <tr>
+        <td><strong>Control de Frecuencia</strong></td>
+        <td>Limitar el número de notificaciones que un usuario recibe en un período de tiempo para evitar la fatiga y la
+          anulación de la suscripción.</td>
+        <td>Siempre. Es vital para la retención de usuarios.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

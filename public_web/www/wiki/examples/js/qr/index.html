@@ -1,0 +1,16 @@
+
+<!doctype html><html lang="es"><meta charset="utf-8"><title>QR Demo</title>
+<body>
+<h1>Generador de QR (Cliente)</h1>
+<input id="txt" placeholder="Texto o URL" />
+<button id="go">Generar</button>
+<canvas id="canvas"></canvas>
+<script type="module">
+import QRCode from 'https://cdn.skypack.dev/qrcode';
+document.getElementById('go').onclick = async ()=>{
+  const text = document.getElementById('txt').value || 'https://ejemplo.local';
+  const canvas = document.getElementById('canvas');
+  await QRCode.toCanvas(canvas, text, {margin:2});
+};
+</script>
+</body></html>

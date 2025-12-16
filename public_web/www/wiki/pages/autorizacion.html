@@ -1,0 +1,243 @@
+
+<header class="section-title">
+  <h1>Autorización & JWT</h1>
+</header>
+<div class="section-separator"></div>
+
+<p>La estrategia de autorización en nuestra arquitectura se centra en el uso de <strong>JSON Web Tokens (JWT)</strong>, 
+  un estándar abierto (RFC 7519) que define una forma compacta y autónoma para transmitir información de forma segura 
+  entre partes como un objeto JSON. Esta información puede ser verificada y confiada porque está firmada digitalmente.</p>
+
+<p>El enfoque principal es utilizar JWT con una expiración corta, complementado con tokens de refresco (refresh tokens) 
+  para mantener la sesión del usuario sin sacrificar la seguridad. La autorización se gestiona mediante un modelo de 
+  Control de Acceso Basado en Roles (RBAC), definido en la estructura de datos del usuario.</p>
+
+<br>
+<h3>Historia y Fundamentos de JWT</h3>
+<p>JWT fue creado por el grupo de trabajo de la IETF (Internet Engineering Task Force) como parte de la 
+  especificación de OAuth 2.0 y OpenID Connect. Su objetivo era estandarizar un formato de token que fuera compacto, 
+  seguro para URL y utilizable en contextos con restricciones de espacio, como las cabeceras HTTP.</p>
+
+
+<br>
+<h3>¿Cómo Funciona un JWT?</h3>
+<p>Un JWT consta de tres partes separadas por puntos (<code>.</code>):</p>
+
+<div class="section">
+  <table class="minimal-table">
+    <thead>
+      <tr>
+        <th>Componente</th>
+        <th>Descripción Detallada</th>
+        <th>Ejemplo (Decodificado)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>1. Header (Encabezado)</strong></td>
+        <td>
+          Objeto JSON que identifica qué algoritmo se utilizó para generar la firma.
+          <ul>
+            <li><code>alg</code>: El algoritmo de firma. En nuestro caso, <strong>RS256</strong> (firma asimétrica con RSA y SHA-256), que es una práctica de alta seguridad.</li>
+            <li><code>typ</code>: El tipo de token, que es <strong>JWT</strong>.</li>
+          </ul>
+          <small>Referencia: <a href="https://tools.ietf.org/html/rfc7515#section-4.1" target="_blank">RFC 7515, Sec. 4.1</a></small>
+        </td>
+        <td><pre class="code-block-inline"><code>{
+  "alg": "RS256",
+  "typ": "JWT"
+}</code></pre></td>
+      </tr>
+      <tr>
+        <td><strong>2. Payload (Carga Útil)</strong></td>
+        <td>
+          Contiene las "reclamaciones" (claims), que son declaraciones sobre el usuario y metadatos adicionales. En nuestra arquitectura, aquí se incrusta la estructura completa de <code>Usuario</code>, lo que hace al token autónomo.
+          <ul>
+            <li><strong>Reclamaciones Registradas:</strong> Estándares como <code>exp</code> (tiempo de expiración) e <code>iss</code> (emisor).</li>
+            <li><strong>Reclamaciones Privadas:</strong> Nuestra estructura personalizada <code>Usuario</code> con todos sus roles y permisos.</li>
+          </ul>
+          <small>Referencia: <a href="https://tools.ietf.org/html/rfc7519#section-4" target="_blank">RFC 7519, Sec. 4</a></small>
+        </td>
+        <td><pre class="code-block-inline"><code>{
+  "Usuario": { ...datos... },
+  "exp": 1678886400,
+  "iss": "Code Epic..."
+}</code></pre></td>
+      </tr>
+      <tr>
+        <td><strong>3. Signature (Firma)</strong></td>
+        <td>
+          Se genera para verificar la integridad y autenticidad del token. Se calcula utilizando el encabezado, el payload, una clave secreta (o privada) y el algoritmo especificado en <code>alg</code>. <strong>Cualquier modificación en el header o payload invalidará la firma</strong>, previniendo la manipulación del token.
+          <br>
+          <small>Fórmula: <code>RSASHA256(base64Url(header) + "." + base64Url(payload), privateKey)</code></small>
+        </td>
+        <td><pre class="code-block-inline"><code>SflKxwRJS...</code></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<pre class="code-block"><code>eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</code></pre>
+
+
+
+<h3>Implementación en Nuestra Arquitectura</h3>
+<div class="section-separator"></div>
+
+
+<p>El proceso de autenticación y generación de tokens se inicia en el 
+  endpoint <code>/v1/api/wusuario/loginV2</code>. Veamos cómo interactúan el 
+  frontend y el backend.</p>
+
+<h4>1. Petición desde el Cliente (Angular)</h4>
+<p>El cliente, en este caso una aplicación Angular, recopila las credenciales del usuario y las envía al 
+  backend mediante una petición POST. Es crucial que esta comunicación se realice 
+  siempre sobre <strong>HTTPS (HTTP/2)</strong> para cifrar el canal y proteger las credenciales en tránsito.</p>
+
+<pre class="code-block">
+<code>// Ejemplo de servicio en Angular para realizar el login
+getLogin(user: string, clave: string): Observable<IToken> {
+  let usuario = {
+    'nombre' : user,
+    'clave' : clave,
+  };
+  // La URL apunta a nuestro endpoint de login
+  let url = this.URL + 'wusuario/loginV2';
+  return this.http.post<IToken>(url, usuario);
+}</code>
+</pre>
+
+<p><strong>Nota sobre seguridad:</strong> Aunque el canal está cifrado por HTTPS, el backend debe validar y sanear las entradas (`user` y `clave`) para prevenir ataques de inyección SQL. El uso de un ORM o consultas parametrizadas es la práctica recomendada para interactuar con la base de datos de forma segura.</p>
+
+<h4>2. Generación del JWT en el Backend (Go)</h4>
+<p>Una vez que el backend valida las credenciales del usuario, procede a generar el JWT. Nuestra función <code>GenerarJWT</code> utiliza el algoritmo <strong>RS256</strong> (RSA con SHA-256), una excelente práctica de seguridad que emplea un par de claves asimétricas (privada y pública).</p>
+
+<ul>
+  <li>La <strong>clave privada</strong> se mantiene segura en el servidor y se usa para firmar el token.</li>
+  <li>La <strong>clave pública</strong> puede ser distribuida a otros servicios para que puedan verificar la autenticidad del token sin necesidad de conocer la clave privada.</li>
+</ul>
+
+<pre class="code-block">
+<code>
+// GenerarJWT Json Web Token
+func GenerarJWT(u Usuario, tiempo time.Duration) string {
+	// Definimos las reclamaciones (claims) del token
+	peticion := Reclamaciones{
+		Usuario: u, // ¡Aquí incrustamos toda la estructura del usuario!
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(tiempo).Unix(), // Claim estándar: Tiempo de expiración
+			Issuer:    "Code Epic Technologies",      // Claim estándar: Emisor del token
+		},
+	}
+
+	// Creamos el token con el algoritmo RS256 y nuestras reclamaciones
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, peticion)
+
+	// Firmamos el token con nuestra llave privada
+	rs, e := token.SignedString(LlavePrivada)
+	if e != nil {
+		system.SystemLog.Println(e.Error() + " Usuario " + u.Nombre)
+	}
+	return rs
+}
+</code>
+</pre>
+
+<h4>3. La Carga Útil (Payload): El Corazón del Token</h4>
+<p>La gran ventaja de nuestro enfoque es que el payload del JWT contiene toda la información necesaria para la autorización, extraída directamente de nuestra estructura <code>Usuario</code>. Esto hace que el token sea "autónomo": el backend no necesita consultar la base de datos en cada petición para verificar los permisos.</p>
+
+<p>Un payload decodificado en nuestro sistema se vería así, reflejando las estructuras Go (<code>Usuario</code>, <code>Aplicacion</code>, <code>Rol</code>, <code>MenuItem</code>, etc.):</p>
+
+<pre class="code-block">
+<code>
+{
+  "Usuario": {
+    "_id": { "$oid": "60d5ecb3a3b4b5b6c8d7e8f9" },
+    "cedula": "12345678",
+    "login": "jdoe",
+    "nombre": "John Doe",
+    "correo": "jdoe@example.com",
+    "cargo": "Desarrollador Senior",
+    "Aplicacion": [
+      {
+        "id": "APP01",
+        "nombre": "Sistema de Gestión",
+        "Rol": {
+          "id": "ADMIN",
+          "descripcion": "Administrador del Sistema",
+          "Menu": [
+            {
+              "accion": "dashboard",
+              "nombre": "Dashboard",
+              "URL": "/dashboard",
+              "SubMenu": []
+            },
+            {
+              "accion": "users",
+              "nombre": "Gestión de Usuarios",
+              "URL": "/users",
+              "Privilegios": [
+                { "accion": "crear", "metodo": "POST" },
+                { "accion": "editar", "metodo": "PUT" }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "Perfil": { "id": "DEV", "descripcion": "Perfil de Desarrollador" },
+    "firmadigital": {
+      "direccionip": "192.168.1.100",
+      "nivel": 5
+    }
+  },
+  "exp": 1678886400,
+  "iss": "Code Epic Technologies"
+}
+</code>
+</pre>
+
+
+<p>Con este payload, un middleware en el backend puede inspeccionar el token de cada petición entrante, verificar su firma y luego decidir si el usuario <code>jdoe</code> tiene permiso para, por ejemplo, acceder al método <code>POST</code> en la ruta <code>/users</code>.</p>
+
+<h3>Buenas Prácticas y Normas ISO</h3>
+<p>Nuestra implementación sigue varias buenas prácticas de seguridad y se alinea con los principios de normativas como la familia <strong>ISO/IEC 27000</strong>, que se centra en los sistemas de gestión de seguridad de la información.</p>
+
+<div class="section-separator"></div>
+
+<div class="section">
+  <table class="minimal-table">
+    <thead>
+      <tr>
+        <th>Ventaja / Buena Práctica Implementada</th>
+        <th>Descripción y Justificación</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Tokens Autónomos (Stateless)</strong></td>
+        <td>El servidor no necesita almacenar el estado de la sesión. Toda la información de autorización está en el token, lo que mejora la escalabilidad.</td>
+      </tr>
+      <tr>
+        <td><strong>Firma Asimétrica (RS256)</strong></td>
+        <td>Aumenta la seguridad. Permite que los servicios de recursos verifiquen el token con una clave pública, sin poder crearlos, centralizando la emisión de tokens en un servicio de autenticación seguro.</td>
+      </tr>
+      <tr>
+        <td><strong>Expiración Corta (<code>ExpiresAt</code>)</strong></td>
+        <td>Limita la ventana de oportunidad para un atacante si un token es robado. Se recomienda usar tokens de corta duración (ej. 15 minutos) junto con refresh tokens para renovarlos.</td>
+      </tr>
+      <tr>
+        <td><strong>Comunicación sobre HTTPS</strong></td>
+        <td>Previene ataques de intermediario (Man-in-the-Middle) y asegura que el token no sea interceptado en texto plano. Es un requisito indispensable.</td>
+      </tr>
+      <tr>
+        <td><strong>No almacenar datos sensibles en el payload</strong></td>
+        <td>El payload es visible (codificado en Base64, no cifrado). Nuestra estructura <code>Usuario</code> excluye datos críticos como la contraseña (<code>Clave</code>).</td>
+      </tr>
+      <tr>
+        <td><strong>Validación del Emisor (<code>Issuer</code>)</strong></td>
+        <td>La claim <code>iss</code> permite al backend verificar que el token fue emitido por una autoridad de confianza ("Code Epic Technologies").</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

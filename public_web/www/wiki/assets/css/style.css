@@ -1,0 +1,471 @@
+/* --- Variables de Diseño (Paleta y Fuentes) --- */
+:root {
+  --font-family: 'Lexend', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  
+  --color-bg: #fdfcfb; /* Crema muy claro */
+  --color-bg-secondary: #ffffff;
+  --color-text: #334155; /* Gris pizarra oscuro */
+  --color-text-secondary: #94a3b8; /* Gris suave */
+  --color-accent: #a78bfa; /* Lavanda pastel */
+  --color-accent-hover: #8b5cf6; /* Lavanda más intenso */
+  --color-border: #f1f5f9; /* Gris extra claro */
+  --color-badge-bg: #f8fafc;
+  --color-badge-text: #64748b;
+  --color-shadow: rgba(149, 157, 165, 0.1);
+
+  /* --- Paleta Pastel para Bloques de Código (Estilo Editor) --- */
+  --code-bg: #f8fafc; /* Fondo gris muy claro */
+  --code-fg: #334155; /* Texto principal, más oscuro para contraste */
+  --code-comment: #94a3b8; /* Comentarios en gris suave */
+  --code-keyword: #8b5cf6; /* Palabras clave en lavanda */
+  --code-string: #10b981; /* Strings en verde esmeralda */
+  --code-function: #2563eb; /* Funciones en azul */
+  --code-punctuation: #64748b; /* Puntuación (brackets, etc.) en gris medio */
+
+  --border-radius: 10px;
+  --shadow: 0 8px 24px var(--color-shadow);
+}
+
+/* --- Reseteo y Estilos Base --- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* --- Layout Principal --- */
+.layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  min-height: 100vh;
+}
+
+aside {
+  background-color: var(--color-bg-secondary);
+  border-right: 1px solid var(--color-border);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+main {
+  padding: 2.5rem;
+  position: relative;
+}
+
+/* --- Componentes de la Barra Lateral (Aside) --- */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo {
+  background-color: var(--color-accent);
+  color: white;
+  font-weight: 800;
+  font-size: 1.25rem;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-content: center;
+  border-radius: var(--border-radius);
+}
+
+.brand-name {
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: 0.02em;
+}
+
+.badge {
+  background-color: var(--color-badge-bg);
+  color: var(--color-badge-text);
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+.search {
+  position: relative;
+}
+
+/* Estilo específico para el icono de la lupa */
+.search > i[data-lucide="search"] {
+  position: absolute;
+  left: 0.85rem; /* Pequeño ajuste para centrarlo mejor en el padding */
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-secondary);
+  transition: color 0.3s;
+  width: 1rem;
+  height: 1rem;
+  pointer-events: none; /* Evita que el icono intercepte clics destinados al input */
+}
+
+.search input {
+  width: 100%;
+  padding: 0.75rem 2.75rem; /* Padding simétrico para más aire */
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  background-color: var(--color-badge-bg); /* Un fondo ligeramente distinto */
+  font-family: var(--font-family);
+  font-size: 0.95rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Transición más suave */
+}
+
+.search input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  background-color: var(--color-bg-secondary); /* Fondo blanco al enfocar */
+  box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.15); /* Sombra de foco más sutil */
+}
+
+.search input:focus + .clear-search,
+.search input:focus ~ i[data-lucide="search"] {
+  color: var(--color-text);
+}
+
+.clear-search {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  padding: 0.25rem;
+  display: inline-flex; /* Usamos inline-flex para el botón */
+  opacity: 0; /* Oculto por defecto, se muestra con JS */
+  transition: opacity 0.2s, color 0.2s;
+}
+
+.clear-search.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.nav details {
+  margin-bottom: 0.5rem;
+}
+
+.nav summary {
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  letter-spacing: 0.03em;
+  color: var(--color-text);
+  transition: background-color 0.2s;
+}
+
+.nav summary:hover {
+  background-color: var(--color-badge-bg);
+}
+
+.nav summary i {
+  width: 1rem;
+  height: 1rem;
+  color: var(--color-text-secondary);
+}
+
+.nav a {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  padding: 0.6rem 0.75rem 0.6rem 2.75rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  transition: color 0.2s, background-color 0.2s, transform 0.2s;
+  position: relative;
+}
+
+.nav a:hover {
+  color: var(--color-text);
+  background-color: var(--color-badge-bg);
+  transform: translateX(4px);
+}
+
+.nav a.active {
+  color: var(--color-accent);
+  font-weight: 600;
+  background-color: #f5f3ff; /* Fondo lavanda muy claro */
+}
+
+.nav a i {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  /* El color del icono se hereda del color del texto del enlace */
+  color: currentColor;
+}
+
+/* --- Contenido Principal (Main) --- */
+.card {
+  background-color: var(--color-bg-secondary);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: 2.5rem 3rem;
+  min-height: 80vh;
+}
+
+.footer {
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+/* --- Estilos de Contenido Dentro de .card --- */
+.section-title h1, .section h2 {
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.5rem;
+}
+
+.section {
+  margin-bottom: 2rem;
+}
+
+.section p {
+  margin-bottom: 1rem;
+}
+
+.image-container {
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.image-container img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--border-radius);
+}
+
+.list-container ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.list-container li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.list-container li i {
+  color: var(--color-accent);
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+/* --- Animaciones y Loader --- */
+.loader-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  inset: 2.5rem; /* Alineado con el padding de main */
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 10;
+  transition: opacity 0.3s;
+}
+
+.loader-wrapper.hidden {
+  display: none;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 5px solid var(--color-border);
+  border-bottom-color: var(--color-accent);
+  border-radius: 50%;
+  animation: rotation 1s linear infinite;
+}
+
+
+
+/* --- Estilos para Tablas (.minimal-table) --- */
+.minimal-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+  font-size: 0.85rem; /* Aumento ligero para mejorar legibilidad */
+  color: var(--color-text);
+  border-radius: var(--border-radius); /* Bordes redondeados para la tabla */
+  overflow: hidden; /* Asegura que el contenido se recorte con el border-radius */
+  box-shadow: var(--shadow); /* Sombra sutil para levantar la tabla */
+  background-color: var(--color-bg-secondary); /* Fondo predeterminado para las filas impares */
+}
+
+.minimal-table thead tr {
+  background-color: var(--color-border); /* Fondo más opaco para la cabecera */
+}
+
+.minimal-table th {
+  padding: 1rem 1.25rem;
+  text-align: left;
+  font-weight: 700; /* Mayor peso para destacar */
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: var(--color-text); /* Texto principal para un look más profundo y con contraste */
+  border-bottom: 2px solid #e2e8f0; /* Borde más oscuro y definido */
+}
+
+.minimal-table th i {
+  width: 18px; /* Iconos ligeramente más pequeños */
+  height: 18px;
+  margin-right: 1rem; /* Espacio entre icono y texto */
+  vertical-align: middle; /* Alineación vertical con el texto */
+  color: var(--color-accent); /* Color de acento para el icono */
+}
+
+.minimal-table tbody tr:nth-child(even) {
+  background-color: var(--color-badge-bg); /* Fondo para filas pares (zebra striping) */
+}
+
+.minimal-table td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #e2e8f0; /* Líneas de fila sutiles pero visibles */
+  vertical-align: top;
+}
+
+/* Elimina el borde de la última fila para un acabado limpio */
+.minimal-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Da más peso a la primera columna para identificar el concepto */
+.minimal-table td:first-child {
+  font-weight: 500;
+}
+
+/* Ancho específico para la primera columna, como en el HTML original */
+.minimal-table th:first-child,
+.minimal-table td:first-child {
+  width: 250px;
+}
+
+.minimal-table tbody tr {
+  transition: background-color 0.2s ease-in-out;
+}
+
+.minimal-table tbody tr:hover {
+  background-color: rgba(167, 139, 250, 0.1); /* Resaltado suave con el color de acento */
+}
+
+/* Estilos para listas dentro de celdas de tabla */
+.minimal-table td ul {
+  list-style: none; /* Elimina los puntos predeterminados */
+  padding-left: 0;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
+
+.minimal-table td ul li {
+  position: relative;
+  padding-left: 1.2em; /* Espacio para el bullet personalizado */
+  margin-bottom: 0.4em;
+  line-height: 1.4;
+}
+
+.minimal-table td ul li::before {
+  content: '•'; /* Bullet personalizado */
+  color: var(--color-accent); /* Color de acento para el bullet */
+  position: absolute;
+  left: 0;
+  font-size: 1.2em;
+  line-height: 1;
+}
+
+/* Estilos para código dentro de celdas de tabla */
+.minimal-table td code {
+  font-family: var(--font-family-mono); /* Fuente monoespaciada */
+  background-color: var(--color-badge-bg); /* Fondo claro para el código */
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-size: 0.85em;
+  color: var(--color-text);
+}
+
+@keyframes rotation {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+#content.fade-in {
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Estilos para Bloques de Código (Tema Dracula) --- */
+.code-block {
+  background-color: var(--code-bg);
+  border-radius: var(--border-radius);
+  border-top: 3px solid;
+  border-image: linear-gradient(to right, var(--code-keyword), var(--code-string)) 1;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  overflow-x: auto;
+  box-shadow: var(--shadow);
+}
+
+.code-block pre {
+  margin: 0;
+}
+
+.code-block code {
+  font-family: var(--font-family-mono);
+  color: var(--code-fg);
+  background: none;
+  padding: 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+/* Estilo para código en línea (fuera de .code-block) */
+code {
+  color: var(--dracula-pink);
+  background-color: rgba(167, 139, 250, 0.1);
+}

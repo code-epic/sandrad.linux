@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="es">
+<head>
+	<base href="/wiki/">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0ea5e9" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="manifest" href="manifest.json" />
+  <title>Sandra Server - Wiki</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+<div class="layout">
+  <aside>
+    <div class="brand">
+      <div class="logo">SSE</div>
+      <div>
+        <div class="brand-name">Sandra Server</div>
+        <div class="badge">Generado 12DIC25 13:21</div>
+      </div>
+    </div>
+    <div class="search">
+      <label class="search-input-wrapper">
+        <input id="q" placeholder="Buscar secciones..." />
+      </label>
+      <button class="clear-search" id="clear-q" title="Limpiar búsqueda"><i data-lucide="x"></i></button>
+    </div>
+    <nav class="nav">
+      <details open>
+        <summary>
+          <i data-lucide="book-copy"></i>
+          <span>Índice</span>
+        </summary>
+        <a href="#pages/index.html"><i data-lucide="home"></i>Introducción</a>
+        <a href="#pages/arquitectura.html"><i data-lucide="drafting-compass"></i>Arquitectura</a>
+        <a href="#pages/http2.html"><i data-lucide="lock"></i>HTTP/2 – HTTPS</a>
+        <a href="#pages/api-rest.html"><i data-lucide="braces"></i>API RESTFul</a>
+        <a href="#pages/qr.html"><i data-lucide="qr-code"></i>Generador QR</a>
+        <a href="#pages/storage.html"><i data-lucide="hard-drive"></i>Contenedores</a>
+        <a href="#pages/upload-download.html"><i data-lucide="file-up"></i>Manejo de Archivos</a>
+        <a href="#pages/websockets.html"><i data-lucide="message-square-plus"></i>WebSockets</a>
+        <a href="#pages/notificaciones.html"><i data-lucide="bell"></i>Web Push</a>
+        <a href="#pages/waf-proxy.html"><i data-lucide="shield"></i>WAF & Proxy</a>
+        <a href="#pages/enterprise-bus.html"><i data-lucide="bus"></i>Bus Empresarial</a>
+        <a href="#pages/drivers.html"><i data-lucide="plug"></i>Conectividad</a>
+        
+<!-- 
+        <a href="#pages/seguridad.html"><i data-lucide="shield-check"></i>Seguridad</a> -->
+        <a href="#pages/versionado-despliegue.html"><i data-lucide="git-commit"></i>Despliegue</a>
+        <a href="#pages/autorizacion.html"><i data-lucide="key-round"></i>Autorización y JWT</a>
+        <a href="#pages/generador-menus.html"><i data-lucide="panel-left-open"></i>Generador de Menús</a>
+        <a href="#pages/reglas-directivas.html"><i data-lucide="file-check-2"></i>Reglas y Directivas</a>
+        <a href="#pages/balanceo-esclavo.html"><i data-lucide="network"></i>Balanceo de Carga</a>
+        <a href="#pages/escaneo-ficheros.html"><i data-lucide="scan-line"></i>Escaneo de Documentos</a>
+        <a href="#pages/motores.html"><i data-lucide="cog"></i>Motores</a>
+        <a href="#pages/funciones.html"><i data-lucide="function-square"></i>Funciones Útiles</a>
+        <a href="#pages/analisis-codigo-red.html"><i data-lucide="code-xml"></i>Análisis de Código</a>
+        <a href="#pages/verificacion-log.html"><i data-lucide="clipboard-check"></i>Verificación de Logs</a>
+        <a href="#pages/interprete-negocios.html"><i data-lucide="brain-circuit"></i>Intérprete de Negocio</a>
+        <a href="#pages/ejecutor-funciones.html"><i data-lucide="play-circle"></i>Automatización</a>
+        <a href="#pages/workflow-fsm.html"><i data-lucide="workflow"></i>Workflow & FSM</a>
+        <a href="#pages/usuarios-roles.html"><i data-lucide="users"></i>Manejo de Usuarios</a>
+        <a href="#pages/optimizacion-seguridad.html"><i data-lucide="shield-plus"></i>Optimización</a>
+        <a href="#pages/analisis-archivos.html"><i data-lucide="file-search-2"></i>Análisis de Archivos</a>
+        <a href="#pages/procesos-logs.html"><i data-lucide="history"></i>Logs y Bitácoras</a>
+        <a href="#pages/cache-background.html"><i data-lucide="database-backup"></i>Caché</a>
+        <a href="#pages/metricas.html"><i data-lucide="gauge-circle"></i>Métricas</a>
+        <a href="#pages/webscraping-pdf.html"><i data-lucide="file-scan"></i>Web Scraping</a>
+      </details>
+      <details>
+        <summary>
+          <i data-lucide="code-2"></i>
+          <span>Ejemplos de Código</span>
+        </summary>
+        <a href="#pages/examples.html"><i data-lucide="file-code-2"></i>Índice de Ejemplos</a>
+      </details>
+    </nav>
+  </aside>
+  <main>
+    <div id="loader" class="loader-wrapper hidden">
+      <div class="spinner"></div>
+    </div>
+    <div id="content" class="card"></div>
+    <div class="footer">PWA offline Code Epic technologies</div>
+  </main>
+</div>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="assets/js/app.js"></script>
+<script>
+  // Inicializa los iconos después de que el DOM esté listo y después de cada carga de contenido.
+  document.addEventListener('DOMContentLoaded', () => lucide.createIcons());
+</script>
+</body></html>
