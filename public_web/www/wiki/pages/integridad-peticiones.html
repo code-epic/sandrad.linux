@@ -1,0 +1,217 @@
+<header class="section-title">
+  <h1>Integridad de Peticiones (Sandra Server)</h1>
+</header>
+<div class="section-separator"></div>
+
+
+<div class="section">
+    <p>
+        Sandra Server provee protección mediante <strong>X-Signature</strong> y <strong>X-Timestamp</strong> en sus cabeceras.
+        Esta arquitectura asegura que el contenido de las peticiones no sea manipulado por intermediarios.
+    </p>
+
+    <h3>Implementación Criptográfica en Angular</h3>
+    <p>El siguiente código muestra la generación de la firma HMAC utilizando la API Web Crypto:</p>
+    <pre class="code-block"><code>public async hmac(message: string, key: string): Promise&lt;string&gt; {
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(key);
+  const messageData = encoder.encode(message);
+
+  // Importar la llave para HMAC
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    keyData,
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+
+  // Firmar el mensaje
+  const signature = await crypto.subtle.sign(
+    'HMAC',
+    cryptoKey,
+    messageData
+  );
+
+  // Convertir el buffer resultante a Hexadecimal
+  return Array.from(new Uint8Array(signature))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+}</code></pre>
+
+    <h3>Automatización mediante HttpInterceptor</h3>
+    <p>
+        Para garantizar que <strong>todas</strong> las peticiones de escritura (POST, PUT, DELETE) estén firmadas sin modificar cada servicio individualmente, se implementa un <code>HttpInterceptor</code>. Este componente intercepta el tráfico saliente, calcula la firma y anexa las cabeceras de seguridad automáticamente.
+    </p>
+    <pre class="code-block"><code>intercept(req: HttpRequest&lt;any&gt;, next: HttpHandler): Observable&lt;HttpEvent&lt;any&gt;&gt; {
+
+    // Ignoramos peticiones GET o sin cuerpo, ya que no modifican estado crítico
+    if (!req.body || req.method === 'GET') {
+      return this.procesarPeticion(req, next);
+    }
+
+    // Generamos la marca de tiempo actual
+    const timestamp = new Date().getTime().toString();
+    
+    // Concatenamos el cuerpo JSON con el timestamp para firmar el conjunto
+    const payload = JSON.stringify(req.body) + timestamp;
+
+    // Usamos 'from' para manejar la promesa del HMAC dentro del flujo reactivo
+    return from(this.sha256.hmac(payload, this.SECRET_KEY)).pipe(
+      switchMap(signature => {
+        // Clonamos la petición inmutable agregando las cabeceras de seguridad
+        const secureReq = req.clone({
+          setHeaders: {
+            'X-Signature': signature,
+            'X-Timestamp': timestamp
+          }
+        });
+
+        return this.procesarPeticion(secureReq, next);
+      })
+    );
+}</code></pre>
+
+    <div class="section-separator"></div>
+
+    <h2>Análisis de Seguridad Ofensiva y Cumplimiento Normativo</h2>
+    <p>
+        La implementación de firmas HMAC y Timestamps no solo protege contra ataques técnicos, sino que asegura el cumplimiento de estándares internacionales de seguridad como <strong>ISO/IEC 27001</strong> y <strong>OWASP ASVS</strong>. Esta arquitectura de "Migas" protege el sistema frente a un atacante que utilice un Proxy de intercepción.
+    </p>
+
+    <h3>1. El Escenario de Intercepción</h3>
+    <p>
+        Cuando un atacante intercepta tu petición en <strong>Burp Suite</strong>, visualizará la siguiente estructura:
+    </p>
+    <pre class="code-block"><code>Headers:
+X-Signature: d166fde7f848...
+X-Timestamp: 1766671754376
+
+Body:
+{"funcion":"_SYS_LstAplicaciones", "parametros": ""}</code></pre>
+
+    <h4>Intento de Manipulación de Payload</h4>
+    <p>
+        Si el atacante modifica el cuerpo a: <code>{"funcion":"_SYS_BorrarBaseDeDatos"}</code> y presiona "Forward", se activa el siguiente protocolo de defensa:
+    </p>
+    <table class="minimal-table">
+        <thead>
+            <tr>
+                <th style="width: 50px; text-align: center;">Paso</th>
+                <th>Acción del Sistema</th>
+                <th>Detalle Técnico</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="text-align: center; vertical-align: middle;"><i data-lucide="arrow-down-to-line"></i></td>
+                <td><strong>1. Recepción</strong></td>
+                <td>El servidor Go recibe la petición interceptada con el payload modificado.</td>
+            </tr>
+            <tr>
+                <td style="text-align: center; vertical-align: middle;"><i data-lucide="file-json"></i></td>
+                <td><strong>2. Extracción</strong></td>
+                <td>Se toma el nuevo body (<em>BorrarBaseDeDatos</em>) y el timestamp original del header.</td>
+            </tr>
+            <tr>
+                <td style="text-align: center; vertical-align: middle;"><i data-lucide="calculator"></i></td>
+                <td><strong>3. Cálculo</strong></td>
+                <td>Go calcula su propia firma para los datos recibidos usando la <code>SECRET_KEY</code> interna.</td>
+            </tr>
+            <tr>
+                <td style="text-align: center; vertical-align: middle;"><i data-lucide="alert-triangle"></i></td>
+                <td><strong>4. Resultado</strong></td>
+                <td>La firma calculada es matemáticamente distinta a la <code>X-Signature</code> que generó Angular.</td>
+            </tr>
+            <tr>
+                <td style="text-align: center; vertical-align: middle;"><i data-lucide="shield-ban"></i></td>
+                <td><strong>5. Acción</strong></td>
+                <td>Go detecta la discrepancia y rechaza la petición con un <strong>403 Forbidden</strong> inmediatamente.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>2. Mitigación de Ataques de Repetición (Replay Attacks)</h3>
+    <p>
+        Si el atacante no modifica el contenido, pero captura una petición válida (ej. Login) y la reenvía masivamente para saturar el sistema, entra en juego la validación temporal en Go.
+    </p>
+    <pre class="code-block"><code>// En Go, dentro de la función ValidarIntegridad
+tsInt, _ := strconv.ParseInt(ts, 10, 64)
+ahora := time.Now().UnixMilli()
+
+// Ventana de validez: 30 segundos
+if ahora - tsInt > 30000 { 
+    return false // Petición expirada, rechazo inmediato.
+}</code></pre>
+
+    <h3>3. Matriz de Cobertura de Seguridad (ISO/OWASP)</h3>
+    <table class="minimal-table">
+        <thead>
+            <tr>
+                
+                <th>Amenaza / Ataque</th>
+                <th>Mecanismo de Defensa (Sandra Server)</th>
+                <th>Estándar de Seguridad (ISO / OWASP)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Manipulación de Datos (Tampering)</strong></td>
+                <td>
+                    El Hash (HMAC) cambia radicalmente si se modifica un solo byte del payload. El servidor rechaza la firma inválida.
+                </td>
+                <td>
+                    <strong>OWASP Top 10 A04:2021</strong><br>
+                    <em>Insecure Design:</em> Falta de verificación de integridad.<br>
+                    <strong>ISO 27001 A.14.1.2</strong><br>
+                    Protección de servicios de aplicaciones en redes públicas.
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Suplantación de Identidad (Spoofing)</strong></td>
+                <td>
+                    Imposible generar firmas válidas sin la <code>SECRET_KEY</code>. El atacante no puede firmar peticiones en nombre del usuario.
+                </td>
+                <td>
+                    <strong>OWASP ASVS V3</strong><br>
+                    Gestión de sesiones y autenticación.<br>
+                    <strong>ISO 27001 A.9.2.1</strong><br>
+                    Registro y baja de usuarios (autenticidad).
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Ataque de Repetición (Replay Attack)</strong></td>
+                <td>
+                    El encabezado <code>X-Timestamp</code> define una ventana de validez (ej. 30s). Peticiones antiguas son descartadas automáticamente.
+                </td>
+                <td>
+                    <strong>OWASP ASVS 3.6</strong><br>
+                    Defensa contra reutilización de tokens/sesiones.<br>
+                    <strong>NIST SP 800-63C</strong><br>
+                    Federation and Assertions (Replay protection).
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Inyección (SQL/NoSQL)</strong></td>
+                <td>
+                    Aunque el WAF falle, la firma garantiza que el comando proviene del código legítimo (Angular) y no de herramientas automatizadas como <code>sqlmap</code>.
+                </td>
+                <td>
+                    <strong>OWASP Top 10 A03:2021</strong><br>
+                    Injection.<br>
+                    <strong>ISO 27001 A.14.2.5</strong><br>
+                    Principios de ingeniería de sistemas seguros.
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Recomendación Final para Angular</h3>
+    <p>
+        Para maximizar la seguridad de la <code>SECRET_KEY</code> en el cliente:
+    </p>
+    <ul>
+        <li>No guardarla como una cadena simple estática.</li>
+        <li><strong>Mejor práctica:</strong> Derivar la clave dinámicamente del token de sesión (<code>sessionStorage.getItem('token')</code>). De esta forma, la "llave" de firma es única para cada sesión de usuario y rota automáticamente al volver a iniciar sesión.</li>
+    </ul>
+</div>

@@ -1,0 +1,291 @@
+
+<header class="section-title">
+  <h1>Configuración Maestra: sandra.ini</h1>
+</header>
+<div class="section-separator"></div>
+
+<div class="section">
+    <p>
+        El archivo <code>sandra.ini</code> constituye el manifiesto de configuración principal de la plataforma. 
+        Utiliza el formato estándar <strong>INI</strong>, caracterizado por su legibilidad y estructura en secciones 
+        (<code>[seccion]</code>) y pares <code>clave = valor</code>. Este archivo gobierna desde el arranque del 
+        daemon hasta la gestión de criptografía y conectividad.
+    </p>
+    <blockquote>
+        <strong>Nota Técnica:</strong> Los cambios en este archivo requieren un reinicio del servicio para que el 
+        proceso en memoria (Heap) recargue las nuevas directivas.
+    </blockquote>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <h2>1. Directivas Globales <code>[globals]</code></h2>
+    <p>
+        Establece las reglas de negocio transversales y los mecanismos de seguridad perimetral del servidor.
+    </p>
+    <table class="minimal-table">
+        <thead>
+            <tr>
+                <th>Parámetro</th>
+                <th>Valor Ejemplo</th>
+                <th>Explicación Técnica y Cumplimiento</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>app_mode</code></td>
+                <td><code>server</code></td>
+                <td>Define la arquitectura de despliegue. <code>server</code> habilita los listeners de red, mientras que <code>client</code> configura el nodo para consumo pasivo.</td>
+            </tr>
+            <tr>
+                <td><code>rsa_signature</code></td>
+                <td><code>true</code></td>
+                <td>
+                    Habilita la firma digital dinámica. Utiliza pares de claves <strong>RSA</strong> (Pública/Privada) para garantizar la integridad y autenticidad de los tokens y comunicaciones internas.
+                    <br><em>Cumplimiento:</em> <strong>ISO/IEC 27001 A.10.1.1</strong> (Política sobre el uso de controles criptográficos).
+                </td>
+            </tr>
+            <tr>
+                <td><code>tiempo_bloqueo</code></td>
+                <td><code>15</code></td>
+                <td>
+                    Establece la ventana de tiempo (en minutos) para el bloqueo temporal de cuentas tras detectar fuerza bruta.
+                    <br><em>Seguridad:</em> Mitigación de ataques de diccionario según recomendaciones <strong>OWASP</strong>.
+                </td>
+            </tr>
+            <tr>
+                <td><code>pool_conection</code></td>
+                <td><code>127.0.0.1</code></td>
+                <td>
+                    Define las direcciones IP autorizadas para el pool de conexiones o gestión administrativa, actuando como una <strong>Lista Blanca (Allowlist)</strong> a nivel de aplicación.
+                </td>
+            </tr>
+            <tr>
+                <td><code>server_push</code></td>
+                <td><code>true</code></td>
+                <td>Activa el subsistema de notificaciones Web Push, integrando servicios de colas (RethinkDB) para entrega asíncrona.</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <h2>2. Rutas del Sistema de Archivos <code>[paths]</code></h2>
+    <p>
+        Define la topología de almacenamiento. Sandra Server sigue una estructura jerárquica para separar binarios, logs, archivos temporales y certificados.
+    </p>
+    <table class="minimal-table">
+        <thead>
+            <tr>
+                <th>Directiva</th>
+                <th>Uso Crítico</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>base</code></td>
+                <td>Raíz de la instalación. Punto de anclaje para rutas relativas.</td>
+            </tr>
+            <tr>
+                <td><code>signature</code></td>
+                <td>
+                    Almacén de material criptográfico (certificados X.509 <code>.crt</code> y claves privadas <code>.key</code>).
+                    <br><em>Seguridad:</em> Esta carpeta debe tener permisos estrictos (ej. <code>chmod 700</code>) en el sistema operativo.
+                </td>
+            </tr>
+            <tr>
+                <td><code>temp</code></td>
+                <td>
+                    Directorio para generación efímera (QR codes, PDFs). El sistema debe implementar rutinas de limpieza automática (Garbage Collection) en esta ruta.
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <h2>3. Auditoría y Logs <code>[log]</code></h2>
+    <p>
+        Configura el sistema de trazabilidad. El registro de eventos es fundamental para la forense digital y el monitoreo operativo.
+    </p>
+    <table class="minimal-table">
+        <thead>
+            <tr>
+                <th>Parámetro</th>
+                <th>Descripción</th>
+                <th>Normativa Asociada</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>system_log</code></td>
+                <td>Registra errores críticos (PANIC, FATAL) y advertencias del kernel de la aplicación.</td>
+                <td rowspan="3">
+                    <strong>ISO/IEC 27001 A.12.4</strong><br>
+                    <em>Registro y monitoreo:</em> Se deben producir, mantener y revisar regularmente los registros de eventos de actividad del usuario, excepciones y eventos de seguridad.
+                </td>
+            </tr>
+            <tr>
+                <td><code>query_log</code></td>
+                <td>Auditoría de consultas a bases de datos. Crucial para detectar inyecciones SQL o accesos no autorizados a datos sensibles.</td>
+            </tr>
+            <tr>
+                <td><code>backup_log</code></td>
+                <td>
+                    Expresión <strong>Cron</strong> (<code>59 11 * * 5</code>) para la rotación y archivado automático de logs. Garantiza la disponibilidad de espacio en disco.
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <h2>4. Virtual Hosts y Enrutamiento <code>[hosts]</code></h2>
+    <p>
+        Mapea dominios o subdominios a directorios físicos específicos, permitiendo que una sola instancia de Sandra Server aloje múltiples aplicaciones (Multi-tenancy).
+    </p>
+    <pre class="code-block"><code>[hosts]
+# Formato: subdominio.dominio = ruta_relativa
+src.localhost = public_web/src
+consola.localhost = public_web/consola
+gdoc.localhost = public_web/www/gdoc</code></pre>
+    <p>
+        El servidor inspecciona la cabecera <code>Host</code> de la petición HTTP entrante para determinar qué aplicación servir.
+    </p>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <h2>5. Puertos y Cifrado TLS <code>[ports]</code></h2>
+    <p>
+        Configura los listeners TCP y la terminación SSL/TLS. Sandra Server maneja nativamente HTTPS, requiriendo la ruta a los certificados.
+    </p>
+    <table class="minimal-table">
+        <thead>
+            <tr>
+                <th>Servicio</th>
+                <th>Puerto Estándar</th>
+                <th>Configuración TLS</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>App Principal</strong></td>
+                <td><code>443</code> (HTTPS)</td>
+                <td>Requiere <code>https_app_cert</code> y <code>https_app_key</code>. Habilita HTTP/2 automáticamente sobre TLS.</td>
+            </tr>
+            <tr>
+                <td><strong>WebSockets (Chat)</strong></td>
+                <td><code>8443</code> (WSS)</td>
+                <td>Puerto dedicado para conexiones persistentes full-duplex. Segregarlo permite reglas de firewall específicas.</td>
+            </tr>
+            <tr>
+                <td><strong>Desarrollo</strong></td>
+                <td><code>2004</code></td>
+                <td>Puerto alternativo para pruebas o acceso a API de desarrollo sin exponer el puerto principal.</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <h2>6. Integración PHP (CGI) <code>[php]</code></h2>
+    <p>
+        Permite la ejecución de scripts PHP heredados o complementarios mediante <strong>CGI (Common Gateway Interface)</strong>.
+    </p>
+    <ul>
+        <li><strong>php_cgi:</strong> Ruta absoluta al binario ejecutable de PHP.</li>
+        <li><strong>php_port:</strong> Puerto interno donde el proceso CGI escucha las peticiones reenviadas por Sandra.</li>
+    </ul>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <h2>Archivo de Configuración Completo</h2>
+    <p>A continuación se presenta el contenido crudo del archivo para referencia directa.</p>
+    <pre class="code-block"><code># Configuracion inicial de Sandra Server
+# @author Code Epic Technologies
+
+[globals]
+app_mode = server
+crontab = true
+server_php = true
+server_dev = true
+server_http = true
+server_https = true
+server_push = true
+pool_conection = 127.0.0.1
+other_paths = false 
+banner = false
+rsa_signature = true 
+tiempo_bloqueo = 15
+
+[paths]
+base = /usr/local/bin/sandra
+log = /usr/local/bin/sandra/log 
+file = /usr/local/bin/sandra/file
+temp = /usr/local/bin/sandra/tmp
+signature = /usr/local/bin/sandra/signature
+bin = /usr/local/bin/sandra/bin
+
+[log]
+system_log = true
+cache_log = true
+query_log = true
+backup_log = 59 11 * * 5 
+format_log = zip
+
+[server]
+protocol = https
+name_dns = localhost
+
+[hosts]
+src.localhost = public_web/src
+consola.localhost = public_web/consola
+carlos.localhost = public_web/consola
+gdoc.localhost = public_web/www/gdoc
+
+[ports]
+http_app = 80
+https_app = 443
+https_app_cert = signature/sandra.app.crt
+https_app_key = signature/sandra.app.key
+
+https_chat = 8443
+https_chat_cert = signature/sandra.app.crt
+https_chat_key = signature/sandra.app.key
+
+https_dev = 2004
+https_dev_cert = signature/sandra.app.crt
+https_dev_key = signature/sandra.app.key
+
+[php]
+php_port = 8087
+php_include = /usr/include 
+php_cgi = /opt/homebrew/Cellar/php@8.3/8.3.14/bin/php
+php_dir = /Users/anonymus/Desktop/sandra/public_web/www
+
+[suport]
+mongodb = true
+mysql = true
+postgresql = true
+oracle = false
+
+[nomina]
+host_nomina = http://localhost:8082/nomina/index.php/WServer/
+
+[assistant]
+host_ai = http://localhost:11434
+host_rethinkdb = localhost:28015</code></pre>
+</div>
