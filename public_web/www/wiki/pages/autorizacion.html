@@ -198,10 +198,16 @@ func GenerarJWT(u Usuario, tiempo time.Duration) string {
 </pre>
 
 
-<p>Con este payload, un middleware en el backend puede inspeccionar el token de cada petición entrante, verificar su firma y luego decidir si el usuario <code>jdoe</code> tiene permiso para, por ejemplo, acceder al método <code>POST</code> en la ruta <code>/users</code>.</p>
-
+<p>Con este payload, un middleware en el backend puede inspeccionar el token de cada petición entrante, 
+  verificar su firma y luego decidir si el usuario <code>jdoe</code> tiene permiso para, por ejemplo, 
+  acceder al método <code>POST</code> en la ruta <code>/users</code>.
+</p>
+<br>
 <h3>Buenas Prácticas y Normas ISO</h3>
-<p>Nuestra implementación sigue varias buenas prácticas de seguridad y se alinea con los principios de normativas como la familia <strong>ISO/IEC 27000</strong>, que se centra en los sistemas de gestión de seguridad de la información.</p>
+<br>
+<p>Nuestra implementación sigue varias buenas prácticas de seguridad y se alinea con los 
+  principios de normativas como la familia <strong>ISO/IEC 27000</strong>, que se centra en los 
+  sistemas de gestión de seguridad de la información.</p>
 
 <div class="section-separator"></div>
 
@@ -241,3 +247,8 @@ func GenerarJWT(u Usuario, tiempo time.Duration) string {
     </tbody>
   </table>
 </div>
+
+
+
+<div class="section-separator"></div>
+

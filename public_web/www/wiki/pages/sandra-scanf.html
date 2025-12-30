@@ -1,0 +1,144 @@
+
+<header class="section-title">
+  <h1>Herramienta de Escaneo: sandra_scanf</h1>
+</header>
+<div class="section-separator"></div>
+
+<div class="section">
+    <p>
+        <strong>sandra_scanf</strong> es una herramienta de línea de comandos (CLI) de alto rendimiento diseñada para la 
+        gestión masiva de archivos. Sus capacidades van más allá del simple listado, integrando funciones de 
+        ciberseguridad, indexación en bases de datos y optimización de almacenamiento mediante deduplicación basada en hash.
+    </p>
+    <p>
+        Soporta una amplia variedad de formatos (PDF, IMG, DOC, XLS, PPT, EXE, ELF, ZIP, TAR) y está optimizada para 
+        ejecutarse en entornos de servidor, permitiendo auditorías de seguridad y organización de activos digitales.
+    </p>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <h2>Características Principales</h2>
+    <table class="minimal-table">
+        <thead>
+            <tr>
+                <th>Funcionalidad</th>
+                <th>Descripción Técnica</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Integridad Criptográfica</strong></td>
+                <td>Generación de huellas digitales únicas para cada archivo utilizando algoritmos <strong>SHA256</strong> y <strong>MD5</strong>.</td>
+            </tr>
+            <tr>
+                <td><strong>Deduplicación</strong></td>
+                <td>Identificación automática de documentos repetidos mediante comparación de hashes, optimizando el espacio de almacenamiento.</td>
+            </tr>
+            <tr>
+                <td><strong>Seguridad y Cuarentena</strong></td>
+                <td>Detección de código malicioso con soporte para aislamiento (cuarentena) y análisis en segundo plano (integración con VirusTotal).</td>
+            </tr>
+            <tr>
+                <td><strong>Indexación en Base de Datos</strong></td>
+                <td>Capacidad para insertar metadatos y enlaces de los archivos escaneados directamente en la base de datos a través de drivers de conexión.</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <h2>Sintaxis y Opciones</h2>
+    <p>La herramienta utiliza <code>GNU getopt</code> para el procesamiento de argumentos, permitiendo el uso de banderas cortas y largas.</p>
+    
+    <pre class="code-block"><code>sandra_scanf [opciones] --path [directorio_o_url]</code></pre>
+
+    <table class="minimal-table">
+        <thead>
+            <tr>
+                <th>Opción Corta</th>
+                <th>Opción Larga</th>
+                <th>Descripción y Ejemplo</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>-p</code></td>
+                <td><code>--path</code></td>
+                <td>
+                    Define la ruta del directorio local o URL remota a escanear.<br>
+                    <code>-p /var/www/docs</code> o <code>-p https://dominio.com/archivo.zip</code>
+                </td>
+            </tr>
+            <tr>
+                <td><code>-i</code></td>
+                <td><code>--index</code></td>
+                <td>
+                    Define el algoritmo de hash (<code>sha256</code>, <code>md5</code>) o activa la inserción en base de datos.<br>
+                    <code>--index sha256</code>
+                </td>
+            </tr>
+            <tr>
+                <td><code>-r</code></td>
+                <td><code>--recursive</code></td>
+                <td>
+                    Activa el escaneo recursivo de subdirectorios. (1 = Activo, 0 = Inactivo).<br>
+                    <code>-r 1</code>
+                </td>
+            </tr>
+            <tr>
+                <td><code>-sl</code></td>
+                <td><code>--save-log</code></td>
+                <td>
+                    Genera un archivo de log con los resultados. Valores: <code>infectados</code>, <code>resumen</code>, <code>duplicados</code>.<br>
+                    <code>--save-log infectados</code>
+                </td>
+            </tr>
+            <tr>
+                <td><code>-sdb</code></td>
+                <td><code>--save-data</code></td>
+                <td>
+                    ID del driver de conexión para persistir los resultados en la base de datos.<br>
+                    <code>--save-data 60aab142a0f72cf87ed7a056</code>
+                </td>
+            </tr>
+            <tr>
+                <td><code>-u</code></td>
+                <td><code>--user</code></td>
+                <td>
+                    Usuario del sistema bajo el cual se evalúa la seguridad o auditoría.<br>
+                    <code>-u admin_sys</code>
+                </td>
+            </tr>
+            <tr>
+                <td><code>-v</code></td>
+                <td><code>--verbose</code></td>
+                <td>
+                    Muestra en pantalla un resumen detallado de cabeceras y tipos de archivo procesados.<br>
+                    <code>-v true</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="section-separator"></div>
+
+<div class="section">
+    <h2>Ejemplos de Uso</h2>
+
+    <h4>1. Escaneo Básico de Documentos</h4>
+    <p>Escanear la carpeta de documentos del usuario actual de forma recursiva.</p>
+    <pre class="code-block"><code>sandra_scanf --path $HOME/Documentos -r 1</code></pre>
+
+    <h4>2. Auditoría de Seguridad y Logs</h4>
+    <p>Escanear buscando duplicados y posibles amenazas, guardando un log de los archivos infectados.</p>
+    <pre class="code-block"><code>sandra_scanf -p /var/uploads --index sha256 --save-log infectados</code></pre>
+
+    <h4>3. Indexación en Base de Datos</h4>
+    <p>Escanear, generar hash SHA256 e indexar los metadatos en la base de datos usando un ID de conexión específico.</p>
+    <pre class="code-block"><code>sandra_scanf -p /mnt/storage/legal -i sha256 -r 1 --save-data 60aab142a0f72cf87ed7a056</code></pre>
+</div>

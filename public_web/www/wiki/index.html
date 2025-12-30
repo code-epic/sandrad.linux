@@ -5,6 +5,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0ea5e9" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -37,20 +40,24 @@
         <a href="#pages/index.html"><i data-lucide="home"></i>Introducción</a>
         <a href="#pages/arquitectura.html"><i data-lucide="drafting-compass"></i>Arquitectura</a>
         <a href="#pages/http2.html"><i data-lucide="lock"></i>HTTP/2 – HTTPS</a>
+        <a href="#pages/waf-proxy.html"><i data-lucide="shield"></i>WAF & Proxy</a>
+        <a href="#pages/integridad-peticiones.html"><i data-lucide="brain"></i>Integridad de Peticiones</a>
+        <a href="#pages/autorizacion.html"><i data-lucide="key-round"></i>Autorización y JWT</a>
+        <a href="#pages/autenticacion.html"><i data-lucide="shield-check"></i>Autenticación</a>
         <a href="#pages/api-rest.html"><i data-lucide="braces"></i>API RESTFul</a>
         <a href="#pages/qr.html"><i data-lucide="qr-code"></i>Generador QR</a>
-        <a href="#pages/storage.html"><i data-lucide="hard-drive"></i>Contenedores</a>
         <a href="#pages/upload-download.html"><i data-lucide="file-up"></i>Manejo de Archivos</a>
+        <a href="#pages/storage.html"><i data-lucide="hard-drive"></i>Contenedores</a>
         <a href="#pages/websockets.html"><i data-lucide="message-square-plus"></i>WebSockets</a>
         <a href="#pages/notificaciones.html"><i data-lucide="bell"></i>Web Push</a>
-        <a href="#pages/waf-proxy.html"><i data-lucide="shield"></i>WAF & Proxy</a>
+
         <a href="#pages/enterprise-bus.html"><i data-lucide="bus"></i>Bus Empresarial</a>
-        <a href="#pages/drivers.html"><i data-lucide="plug"></i>Conectividad</a>
+        <!-- <a href="#pages/drivers.html"><i data-lucide="plug"></i>Conectividad</a> -->
         
 <!-- 
         <a href="#pages/seguridad.html"><i data-lucide="shield-check"></i>Seguridad</a> -->
-        <a href="#pages/versionado-despliegue.html"><i data-lucide="git-commit"></i>Despliegue</a>
-        <a href="#pages/autorizacion.html"><i data-lucide="key-round"></i>Autorización y JWT</a>
+        <!-- <a href="#pages/versionado-despliegue.html"><i data-lucide="git-commit"></i>Despliegue</a>
+        
         <a href="#pages/generador-menus.html"><i data-lucide="panel-left-open"></i>Generador de Menús</a>
         <a href="#pages/reglas-directivas.html"><i data-lucide="file-check-2"></i>Reglas y Directivas</a>
         <a href="#pages/balanceo-esclavo.html"><i data-lucide="network"></i>Balanceo de Carga</a>
@@ -68,15 +75,22 @@
         <a href="#pages/procesos-logs.html"><i data-lucide="history"></i>Logs y Bitácoras</a>
         <a href="#pages/cache-background.html"><i data-lucide="database-backup"></i>Caché</a>
         <a href="#pages/metricas.html"><i data-lucide="gauge-circle"></i>Métricas</a>
-        <a href="#pages/webscraping-pdf.html"><i data-lucide="file-scan"></i>Web Scraping</a>
+        <a href="#pages/webscraping-pdf.html"><i data-lucide="file-scan"></i>Web Scraping</a> -->
       </details>
+     
       <details>
         <summary>
           <i data-lucide="code-2"></i>
-          <span>Ejemplos de Código</span>
+          <span>Configuración Archivos</span>
         </summary>
-        <a href="#pages/examples.html"><i data-lucide="file-code-2"></i>Índice de Ejemplos</a>
+        <a href="#pages/sandra-ini.html"><i data-lucide="file-code-2"></i>sandra.ini</a>
+        <a href="#pages/sandra-scanf.html"><i data-lucide="file-code-2"></i>sandra_scanf</a>
       </details>
+
+       <div class="nav-separator" style="margin: 10px 0; border-top: 1px solid rgba(255,255,255,0.1);"></div>
+      <button id="btn-generate-pdf" class="nav-link-btn" style="width:100%; text-align:left; background:none; border:none; color:inherit; padding: 8px 12px; cursor:pointer; display:flex; align-items:center; gap:8px; font-family:inherit;">
+        <i data-lucide="printer"></i> <span>Generar PDF Completo</span>
+      </button>
     </nav>
   </aside>
   <main>
@@ -92,5 +106,116 @@
 <script>
   // Inicializa los iconos después de que el DOM esté listo y después de cada carga de contenido.
   document.addEventListener('DOMContentLoaded', () => lucide.createIcons());
+
+  // Lógica de Generación de PDF (Libro Completo)
+  document.getElementById('btn-generate-pdf').addEventListener('click', async () => {
+    const btn = document.getElementById('btn-generate-pdf');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = `<div class="spinner" style="width:16px;height:16px;border-width:2px;"></div> Generando...`;
+    btn.disabled = true;
+
+    try {
+      // 1. Recolectar todos los enlaces de contenido del menú
+      const links = Array.from(document.querySelectorAll('nav a'))
+        .filter(a => a.getAttribute('href').startsWith('#pages/'));
+
+      // 2. Preparar el contenedor del libro
+      const bookContent = [];
+      const toc = [];
+      const parser = new DOMParser();
+
+      // 3. Iterar y descargar cada página
+      for (const link of links) {
+        const url = link.getAttribute('href').replace('#', ''); // e.g., pages/arquitectura.html
+        const title = link.innerText.trim();
+        const id = 'page-' + url.replace(/[^a-z0-9]/gi, '-');
+
+        try {
+          const response = await fetch(url, { cache: 'no-store' });
+          const htmlText = await response.text();
+          const doc = parser.parseFromString(htmlText, 'text/html');
+          
+          // Extraer contenido relevante (asumiendo que las páginas tienen estructura de bloques)
+          // Si hay un header h1, lo usamos, si no, inyectamos el título del menú
+          let content = doc.body.innerHTML;
+          
+          // Añadir al Índice
+          toc.push(`<li><a href="#${id}">${title}</a></li>`);
+
+          // Añadir al contenido del libro con un salto de página
+          bookContent.push(`
+            <div id="${id}" class="book-chapter">
+              <div class="chapter-break"></div>
+              ${content}
+            </div>
+          `);
+        } catch (e) {
+          console.error(`Error cargando ${url}`, e);
+        }
+      }
+
+      // 4. Construir el HTML final para impresión
+      const printWindow = window.open('', '_blank');
+      const date = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+      
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Documentación Completa - Sandra Server</title>
+          <link rel="stylesheet" href="assets/css/style.css" />
+          <style>
+            @media print {
+              @page { margin: 2.5cm; size: A4; }
+              body { font-family: 'Lexend', sans-serif; color: #000; background: #fff; }
+              a { text-decoration: none; color: #000; }
+              .cover-page { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; page-break-after: always; }
+              .toc-page { page-break-after: always; }
+              .chapter-break { page-break-before: always; }
+              .no-print { display: none; }
+              /* Ajustes para tablas y código en PDF */
+              pre { white-space: pre-wrap; word-break: break-all; background: #f5f5f5; border: 1px solid #ddd; }
+              table { page-break-inside: auto; width: 100%; border-collapse: collapse; }
+              tr { page-break-inside: avoid; page-break-after: auto; }
+            }
+            /* Estilos visuales para la vista previa */
+            body { max-width: 210mm; margin: 0 auto; padding: 20px; }
+            .cover-page h1 { font-size: 3rem; margin-bottom: 1rem; color: #0ea5e9; }
+            .toc-page ul { list-style-type: none; padding: 0; }
+            .toc-page li { margin-bottom: 8px; border-bottom: 1px dotted #ccc; }
+            .toc-page a { display: flex; justify-content: space-between; }
+          </style>
+        </head>
+        <body>
+          <div class="cover-page">
+            <div style="font-size: 4rem; font-weight: bold; margin-bottom: 20px;">SSE</div>
+            <h1>Sandra Server</h1>
+            <h2>Documentación Técnica & Arquitectura</h2>
+            <p style="margin-top: 50px; color: #666;">Generado el ${date}</p>
+          </div>
+          <div class="toc-page">
+            <h2>Índice de Contenidos</h2>
+            <ul>${toc.join('')}</ul>
+          </div>
+          <div class="content-body">
+            ${bookContent.join('')}
+          </div>
+          <script>
+            // Auto-imprimir cuando cargue
+            window.onload = () => { setTimeout(() => { window.print(); }, 1000); };
+          <\/script>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+
+    } catch (error) {
+      alert('Hubo un error generando el PDF: ' + error.message);
+    } finally {
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+      lucide.createIcons(); // Re-init icons for the button
+    }
+  });
 </script>
 </body></html>
