@@ -1,27 +1,26 @@
-
 <header class="section-title">
-  <h1>Autenticación y Seguridad Híbrida</h1>
+    <h1>Autenticación y Seguridad Híbrida</h1>
 </header>
 <div class="section-separator"></div>
 
 <div class="section">
     <p>
-        Es un sistema de autenticación robusto desarrollado en Go, 
-        que integra validación de identidad (LDAP/Local), protección contra ataques de fuerza bruta 
-        mediante <strong>Memoria Local Fragmentada (Sharding)</strong> y persistencia de 
+        Es un sistema de autenticación robusto desarrollado en Go,
+        que integra validación de identidad (LDAP/Local), protección contra ataques de fuerza bruta
+        mediante <strong>Memoria Local Fragmentada (Sharding)</strong> y persistencia de
         bloqueos en MongoDB con mecanismos de auto-eliminación TTL.
     </p>
 </div>
 
 <div class="section">
     <h2>Flujo de Arquitectura de Seguridad</h2>
-    <p>El siguiente modelo describe el ciclo de vida de una petición de autenticación, desde la 
-      validación perimetral hasta la emisión del token:</p>
-     
-  <table style="width: 100%; border: none;">
-    <tr style="background-color: transparent;">
-      <td style="width: 35%; vertical-align: top; padding-right: 15px;">
-        <pre class="code-block"><code>sequenceDiagram
+    <p>El siguiente modelo describe el ciclo de vida de una petición de autenticación, desde la
+        validación perimetral hasta la emisión del token:</p>
+
+    <table style="width: 100%; border: none;">
+        <tr style="background-color: transparent;">
+            <td style="width: 35%; vertical-align: top; padding-right: 15px;">
+                <pre class="code-block"><code>sequenceDiagram
     participant U as Cliente (Frontend)
     participant W as WAF (Detect Injection)
     participant ML as Memoria Local (LoginTracker)
@@ -53,15 +52,15 @@
             end
         end
     end</code></pre>
-      </td>
-      <td style="width: 65%; vertical-align: top; padding-left: 15px;">
-        <a href="assets/img/authorization.png" target="_blank" title="Haz clic para ampliar la imagen">
-          <img src="assets/img/authorization.png" alt="Diagrama de Secuencia de Seguridad" 
-          style="width: 100%; cursor: pointer; border-radius: 8px;">
-        </a>
-      </td>
-    </tr>
-  </table>
+            </td>
+            <td style="width: 65%; vertical-align: top; padding-left: 15px;">
+                <a href="assets/img/authorization.png" target="_blank" title="Haz clic para ampliar la imagen">
+                    <img src="assets/img/authorization.png" alt="Diagrama de Secuencia de Seguridad"
+                        style="width: 100%; cursor: pointer; border-radius: 8px;">
+                </a>
+            </td>
+        </tr>
+    </table>
 
 
 
@@ -73,29 +72,33 @@
 
 <div class="section">
     <h2>Componentes de Seguridad y Reglas Técnicas</h2>
-    
+
     <h3>1. Protección WAF (Web Application Firewall)</h3>
     <br>
     <p>
-        Antes de procesar cualquier dato, el sistema utiliza el paquete <code>waf</code> para detectar patrones de 
+        Antes de procesar cualquier dato, el sistema utiliza el paquete <code>waf</code> para detectar patrones de
         inyección en el nombre de usuario.
     </p>
     <blockquote>
-        <strong>Regla:</strong> Si <code>validate.Injection</code> detecta caracteres o comandos maliciosos, la solicitud se aborta 
+        <strong>Regla:</strong> Si <code>validate.Injection</code> detecta caracteres o comandos maliciosos, la
+        solicitud se aborta
         inmediatamente sin consultar la base de datos, protegiendo la integridad del motor de búsqueda.
     </blockquote>
     <br>
     <h3>2. Memoria Local Fragmentada (LoginTracker)</h3>
     <br>
     <p>
-        Para gestionar los intentos fallidos con alta eficiencia y concurrencia, el sistema implementa una 
+        Para gestionar los intentos fallidos con alta eficiencia y concurrencia, el sistema implementa una
         estructura de <strong>Sharding (Fragmentación)</strong> alojada en el Heap de la memoria RAM del servidor Go.
-        Esta técnica es crítica para evitar cuellos de botella (Lock Contention) cuando miles de usuarios intentan autenticarse simultáneamente.
+        Esta técnica es crítica para evitar cuellos de botella (Lock Contention) cuando miles de usuarios intentan
+        autenticarse simultáneamente.
     </p>
 
     <h4>Arquitectura de 32 Fragmentos (Shards)</h4>
     <p>
-        En lugar de utilizar un único mapa protegido por un Mutex global (lo que obligaría a todos los usuarios a hacer fila uno por uno para validar sus intentos), dividimos el espacio de memoria en <strong>32 fragmentos independientes</strong>.
+        En lugar de utilizar un único mapa protegido por un Mutex global (lo que obligaría a todos los usuarios a hacer
+        fila uno por uno para validar sus intentos), dividimos el espacio de memoria en <strong>32 fragmentos
+            independientes</strong>.
     </p>
 
     <table class="minimal-table">
@@ -108,19 +111,25 @@
         <tbody>
             <tr>
                 <td><strong>Shard (Fragmento)</strong></td>
-                <td>Una subdivisión lógica de la memoria. Cada uno de los 32 shards gestiona aproximadamente el <strong>3.12%</strong> del total de usuarios. Cada shard posee su propio cerrojo (<code>sync.RWMutex</code>).</td>
+                <td>Una subdivisión lógica de la memoria. Cada uno de los 32 shards gestiona aproximadamente el
+                    <strong>3.12%</strong> del total de usuarios. Cada shard posee su propio cerrojo
+                    (<code>sync.RWMutex</code>).</td>
             </tr>
             <tr>
                 <td><strong>Función Hash</strong></td>
-                <td>Algoritmo determinista (ej. FNV-1a) que decide dónde vive un usuario: <code>shard_id = hash(usuario) % 32</code>. Esto distribuye la carga uniformemente.</td>
+                <td>Algoritmo determinista (ej. FNV-1a) que decide dónde vive un usuario:
+                    <code>shard_id = hash(usuario) % 32</code>. Esto distribuye la carga uniformemente.</td>
             </tr>
             <tr>
                 <td><strong>Consumo de RAM</strong></td>
-                <td>Extremadamente eficiente. Almacena solo <code>string</code> (login) + <code>int</code> (intentos) + <code>time</code>. 100,000 usuarios activos consumen apenas ~20MB de RAM.</td>
+                <td>Extremadamente eficiente. Almacena solo <code>string</code> (login) + <code>int</code> (intentos) +
+                    <code>time</code>. 100,000 usuarios activos consumen apenas ~20MB de RAM.</td>
             </tr>
             <tr>
                 <td><strong>Concurrencia</strong></td>
-                <td>Permite que hasta 32 hilos de ejecución (Goroutines) escriban en memoria <strong>simultáneamente</strong> sin bloquearse entre sí, aumentando el throughput en un factor de ~30x frente a un mapa estándar.</td>
+                <td>Permite que hasta 32 hilos de ejecución (Goroutines) escriban en memoria
+                    <strong>simultáneamente</strong> sin bloquearse entre sí, aumentando el throughput en un factor de
+                    ~30x frente a un mapa estándar.</td>
             </tr>
         </tbody>
     </table>
@@ -137,7 +146,8 @@ Usuario "Luis" -> Hash("Luis") % 32 = 12 -> Accede al Shard[12] (Lock B)
     <h3>3. Persistencia de Bloqueo y TTL en MongoDB</h3>
     <br>
     <p>
-        Cuando un usuario supera el límite de <code>INTENTOSFALLIDOS_MAXIMOS</code> (definido en 3), el sistema escala el bloqueo de la 
+        Cuando un usuario supera el límite de <code>INTENTOSFALLIDOS_MAXIMOS</code> (definido en 3), el sistema escala
+        el bloqueo de la
         memoria volátil a la persistencia en MongoDB.
     </p>
     <table class="minimal-table">
@@ -154,8 +164,10 @@ Usuario "Luis" -> Hash("Luis") % 32 = 12 -> Accede al Shard[12] (Lock B)
                 <td style="text-align: center; vertical-align: middle;"><i data-lucide="clock"></i></td>
                 <td><strong>Índice TTL (Time-To-Live)</strong></td>
                 <td>
-                    MongoDB elimina automáticamente el documento cuando la fecha del campo <code>expira</code> es alcanzada. 
-                    <strong>Regla:</strong> <code>expireAfterSeconds: 0</code> significa que expira exactamente en la fecha almacenada.
+                    MongoDB elimina automáticamente el documento cuando la fecha del campo <code>expira</code> es
+                    alcanzada.
+                    <strong>Regla:</strong> <code>expireAfterSeconds: 0</code> significa que expira exactamente en la
+                    fecha almacenada.
                 </td>
                 <td>
                     <strong>ISO/IEC 27001:2013 A.9.4.2</strong><br>
@@ -166,7 +178,8 @@ Usuario "Luis" -> Hash("Luis") % 32 = 12 -> Accede al Shard[12] (Lock B)
                 <td style="text-align: center; vertical-align: middle;"><i data-lucide="database"></i></td>
                 <td><strong>Upsert Atómico</strong></td>
                 <td>
-                    Se utiliza <code>UpdateOne</code> con <code>upsert: true</code>. Si el bloqueo ya existe, se actualiza el tiempo; si no, se crea.
+                    Se utiliza <code>UpdateOne</code> con <code>upsert: true</code>. Si el bloqueo ya existe, se
+                    actualiza el tiempo; si no, se crea.
                     Garantiza que no haya duplicados ni condiciones de carrera.
                 </td>
                 <td>
@@ -178,16 +191,24 @@ Usuario "Luis" -> Hash("Luis") % 32 = 12 -> Accede al Shard[12] (Lock B)
     </table>
 
     <h4>Implementación de Índices en MongoDB</h4>
-    <p>Para que el mecanismo funcione, es crítico crear los índices correctamente en la colección de intenciones fallidas:</p>
+    <p>Para que el mecanismo funcione, es crítico crear los índices correctamente en la colección de intenciones
+        fallidas:</p>
     <pre class="code-block"><code>// 1. Índice TTL: El documento se borra cuando la fecha en 'expira' pasa.
 db.intencion.createIndex({ "expira": 1 }, { expireAfterSeconds: 0 })
 
 // 2. Índice Único: Garantiza un solo registro de bloqueo por usuario.
-db.intencion.createIndex({ "usuario": 1 }, { unique: true })</code></pre>
+db.intencion.createIndex({ "usuario": 1 }, { unique: true })
+
+// 3. 2. Índice Único: Garantiza una sola sesión de usuario activa por usuario.
+db.getCollection("usuario-sesion").createIndex({ "usuario": 1 }, { unique: true });
+
+// 4. Índice TTL: El documento se borra cuando la fecha en 'expira' pasa.
+db.getCollection("usuario-sesion").createIndex({ "expira": 1 }, { expireAfterSeconds: 0 });</code></pre>
 
     <h4>Lógica de Bloqueo en Go</h4>
     <p>
-        La función <code>BloquearEnMongo</code> calcula el tiempo de expiración basándose en la configuración del sistema (<code>TIEMPO_BLOQUEO</code>) y realiza la operación de upsert.
+        La función <code>BloquearEnMongo</code> calcula el tiempo de expiración basándose en la configuración del
+        sistema (<code>TIEMPO_BLOQUEO</code>) y realiza la operación de upsert.
     </p>
     <pre class="code-block"><code>func BloquearEnMongo(login string) {
 	c := system.MongoDB.Collection(system.CINTENCIONESFALLIDAS)
@@ -207,6 +228,108 @@ db.intencion.createIndex({ "usuario": 1 }, { unique: true })</code></pre>
 }</code></pre>
 </div>
 
+
+<br>
+<h3>4. Autenticación con TOTP</h3>
+<br>
+<p>
+    La implementación de <strong>TOTP (Time-based One-Time Password)</strong> responde a una estrategia de defensa en
+    profundidad, elevando el nivel de aseguramiento de identidad (LoA) mediante un segundo factor (2FA) que no depende
+    de la conectividad de red ni de servicios de terceros vulnerables (como SMS).
+    Este mecanismo se basa en el estándar abierto <strong>RFC 6238</strong>, garantizando interoperabilidad nativa con
+    ecosistemas como <strong>Google Android</strong> y <strong>Apple iOS</strong>.
+</p>
+<br>
+<h4>Justificación Normativa y Legal</h4>
+<br>
+<ul style="padding-left: 20px;">
+    <li>
+        <strong>NIST SP 800-63B (Digital Identity Guidelines):</strong> Clasifica a TOTP como un autenticador
+        criptográfico multi-factor (AAL2/AAL3), técnicamente superior a SMS/PSTN. <a
+            href="https://pages.nist.gov/800-63-3/sp800-63b.html" target="_blank" rel="noopener noreferrer">[Referencia
+            NIST]</a>
+    </li>
+    <li>
+        <strong>ISO/IEC 27001:2013 (Control A.9.4.3):</strong> Gestión de sistemas de contraseñas y autenticación
+        segura.
+    </li>
+    <li>
+        <strong>GDPR (RGPD) Art. 32:</strong> Exige medidas técnicas apropiadas (como 2FA) para garantizar la seguridad
+        del procesamiento de datos personales.
+    </li>
+    <li>
+        <strong>PSD2 (Directiva Europea):</strong> Cumple con los requisitos de "Autenticación Reforzada de Clientes"
+        (SCA) bajo el criterio de <em>Posesión</em> (el dispositivo móvil).
+    </li>
+</ul>
+<br>
+<h4>Ventajas de TOTP Offline (Sin Internet)</h4>
+<table class="minimal-table">
+    <thead>
+        <tr>
+            <th>Ventaja Estratégica</th>
+            <th>Descripción Técnica</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>Resistencia a SIM Swapping</strong></td>
+            <td>El secreto (semilla) se almacena localmente en el dispositivo. No viaja por la red telefónica,
+                eliminando el riesgo de interceptación de SMS.</td>
+        </tr>
+        <tr>
+            <td><strong>Disponibilidad Total (Air-Gapped)</strong></td>
+            <td>El algoritmo se ejecuta localmente. Funciona en modo avión, zonas sin cobertura o redes restringidas.
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Privacidad (Zero-Knowledge)</strong></td>
+            <td>El servidor no envía el código al usuario; ambos extremos lo calculan independientemente basándose en el
+                tiempo.</td>
+        </tr>
+    </tbody>
+</table>
+
+<h4>Ejemplo Dinámico del Algoritmo (RFC 6238)</h4>
+<p>El código se regenera cada 30 segundos. La validación matemática sigue este flujo lógico:</p>
+
+<table style="width: 100%; border: none;">
+        <tr style="background-color: transparent;">
+            <td style="width: 35%; vertical-align: top; padding-right: 15px;">
+<pre class="code-block"><code>// 1. Secreto Compartido (Base32) y Tiempo Actual
+Secret = "JBSWY3DPEHPK3PXP" 
+Time   = Floor(UnixTime / 30) // Ventanas de 30 seg desde 1970
+
+// 2. Criptografía HMAC-SHA1
+Hash   = HMAC-SHA1(Secret, Time)
+
+// 3. Truncamiento Dinámico
+Offset = Hash[last_byte] & 0x0F
+Binary = (Hash[Offset]...Hash[Offset+3]) & 0x7FFFFFFF
+
+// 4. Generación del PIN
+TOTP   = Binary % 1000000 // Resultado: 6 dígitos (ej. 582 394)</code></pre>  </td>
+            <td style="width: 65%; vertical-align: top; padding-left: 15px;">
+                <a href="assets/img/autenticacion.png" target="_blank" title="Haz clic para ampliar la imagen">
+                    <img src="assets/img/autenticacion.png" alt="Diagrama de Secuencia de Seguridad"
+                        style="width: 100%; cursor: pointer; border-radius: 8px;">
+                </a>
+            </td>
+        </tr>
+    </table>
+
+<h4>Aplicaciones y Plugins Compatibles</h4>
+<p>Al ser un protocolo estandarizado, permite al usuario elegir su herramienta de confianza:</p>
+<ul style="padding-left: 20px;">
+    <li><strong>Google Authenticator:</strong> Estándar de facto en Android.</li>
+    <li><strong>Apple iOS (Llavero):</strong> Integrado nativamente en Configuración > Contraseñas (desde iOS 15).</li>
+    <li><strong>Microsoft Authenticator:</strong> Común en entornos corporativos Azure/365.</li>
+    <li><strong>FreeOTP:</strong> Alternativa Open Source mantenida por Red Hat.</li>
+    <li><strong>Plugins de Navegador:</strong> Bitwarden, 1Password, Authenticator (Extensión Chrome/Edge).</li>
+</ul>
+
+
+<br>
 <div class="section-separator"></div>
 
 <div class="section">
@@ -216,19 +339,97 @@ db.intencion.createIndex({ "usuario": 1 }, { unique: true })</code></pre>
             <tr>
                 <th>Endpoint</th>
                 <th>Método</th>
-                <th>Descripción</th>
+                <th>Descripción Técnica y Funcionalidad</th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td><code>/api/v1/wusuario/login</code></td>
                 <td><code>POST</code></td>
-                <td>Autenticación estándar (LDAP o Local según configuración).</td>
+                <td><strong>Autenticación Primaria (Factor de Conocimiento).</strong> Valida credenciales contra directorio activo (LDAP) o base de datos local.</td>
             </tr>
             <tr>
                 <td><code>/api/v1/wusuario/loginV2</code></td>
                 <td><code>POST</code></td>
-                <td>Autenticación reforzada con validación V2 (Hash 256).</td>
+                <td><strong>Autenticación Robusta.</strong> Implementa hashing SHA-256 del lado del cliente antes de la transmisión para asegurar integridad.</td>
+            </tr>
+            <tr>
+                <td><code>/api/v1/wusuario/logout</code></td>
+                <td><code>POST</code></td>
+                <td><strong>Cierre de Sesión Seguro.</strong> Invalida el token JWT actual y limpia el contexto de seguridad del usuario.</td>
+            </tr>
+            <tr>
+                <td><code>/api/v1/wusuario/gtotp/{tipo}</code></td>
+                <td><code>GET</code></td>
+                <td><strong>Enrolamiento 2FA (Provisioning).</strong> Genera el secreto compartido. Retorna imagen QR (PNG) y semilla Base32 en JSON <code>{contenido:""}</code>.</td>
+            </tr>
+            <tr>
+                <td><code>/api/v1/wusuario/vtop</code></td>
+                <td><code>POST</code></td>
+                <td><strong>Verificación TOTP.</strong> Recibe <code>{codigo:""}</code> y valida el algoritmo RFC 6238 dentro de la ventana de tiempo permitida.</td>
+            </tr>
+            <tr>
+                <td><code>/api/v1/wusuario/multiplesesion</code></td>
+                <td><code>POST</code></td>
+                <td><strong>Control de Concurrencia.</strong> Marca la sesión como activa tras éxito de TOTP y gestiona el bloqueo preventivo por múltiples sesiones simultáneas.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Tabla de Respuestas y Estados</h3>
+    <p>A continuación se detallan los posibles códigos de estado y mensajes que la API puede retornar según el resultado
+        de la autenticación:</p>
+    <table class="minimal-table">
+        <thead>
+            <tr>
+                <th>Escenario</th>
+                <th>Código HTTP</th>
+                <th>Mensaje JSON (Ejemplo)</th>
+                <th>Razón Técnica</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>JSON malformado</strong></td>
+                <td><code>400 Bad Request</code></td>
+                <td>N/A (Texto plano)</td>
+                <td>Error de sintaxis en la petición del cliente.</td>
+            </tr>
+            <tr>
+                <td><strong>Intento de Inyección</strong></td>
+                <td><code>403 Forbidden</code></td>
+                <td><code>"Error de Credenciales"</code></td>
+                <td>Ataque detectado por WAF (SQLi/NoSQLi).</td>
+            </tr>
+            <tr>
+                <td><strong>Bloqueo (3+ fallos)</strong></td>
+                <td><code>403 Forbidden</code></td>
+                <td><code>"Cuenta bloqueada temporalmente..."</code></td>
+                <td>Protección de fuerza bruta activa (TTL en MongoDB).</td>
+            </tr>
+            <tr>
+                <td><strong>Clave Incorrecta</strong></td>
+                <td><code>403 Forbidden</code></td>
+                <td><code>"Error de Credenciales"</code></td>
+                <td>Fallo de autenticación. Mensaje genérico para evitar enumeración.</td>
+            </tr>
+            <tr>
+                <td><strong>Usuario Deshabilitado</strong></td>
+                <td><code>403 Forbidden</code></td>
+                <td><code>"Usuario inactivo..."</code></td>
+                <td>Restricción administrativa sobre la cuenta.</td>
+            </tr>
+            <tr>
+                <td><strong>Firma Caducada</strong></td>
+                <td><code>403 Forbidden</code></td>
+                <td><code>"Su firma ha vencido..."</code></td>
+                <td>El token o firma de seguridad ha expirado.</td>
+            </tr>
+            <tr>
+                <td><strong>Login Exitoso</strong></td>
+                <td><code>200 OK</code></td>
+                <td><code>{ "token": "...", "User": {...} }</code></td>
+                <td>Acceso concedido. Retorna JWT y datos del usuario.</td>
             </tr>
         </tbody>
     </table>
@@ -254,32 +455,39 @@ db.intencion.createIndex({ "usuario": 1 }, { unique: true })</code></pre>
                 <td style="text-align: center; vertical-align: middle;"><i data-lucide="shield-alert"></i></td>
                 <td><strong>Bloqueo Preventivo Persistente</strong></td>
                 <td>
-                    Se implementa un mecanismo de <em>Throttling</em>. Si <code>intentos >= 3</code>, se invoca <code>seguridad.BloquearEnMongo</code>. 
-                    La persistencia garantiza que el bloqueo sobreviva a reinicios del servidor (stateless), mitigando ataques de fuerza bruta continuos.
+                    Se implementa un mecanismo de <em>Throttling</em>. Si <code>intentos >= 3</code>, se invoca
+                    <code>seguridad.BloquearEnMongo</code>.
+                    La persistencia garantiza que el bloqueo sobreviva a reinicios del servidor (stateless), mitigando
+                    ataques de fuerza bruta continuos.
                 </td>
                 <td>
                     <strong>ISO/IEC 27002 Control 9.4.2</strong><br>
-                    <em>Procedimientos seguros de inicio de sesión.</em> Limitar el número de intentos fallidos permitidos.
+                    <em>Procedimientos seguros de inicio de sesión.</em> Limitar el número de intentos fallidos
+                    permitidos.
                 </td>
             </tr>
             <tr>
                 <td style="text-align: center; vertical-align: middle;"><i data-lucide="rotate-ccw"></i></td>
                 <td><strong>Restablecimiento de Estado (Auto-Healing)</strong></td>
                 <td>
-                    Tras una autenticación exitosa (<code>200 OK</code>), se ejecuta <code>tracker.Reset</code> y <code>seguridad.DesbloquearEnMongo</code>. 
-                    Esto asegura la disponibilidad para usuarios legítimos, limpiando contadores en memoria y flags en BD.
+                    Tras una autenticación exitosa (<code>200 OK</code>), se ejecuta <code>tracker.Reset</code> y
+                    <code>seguridad.DesbloquearEnMongo</code>.
+                    Esto asegura la disponibilidad para usuarios legítimos, limpiando contadores en memoria y flags en
+                    BD.
                 </td>
                 <td>
                     <strong>Principio de Disponibilidad (CIA)</strong><br>
-                    Garantizar el acceso a usuarios autorizados y prevenir la denegación de servicio por bloqueo accidental.
+                    Garantizar el acceso a usuarios autorizados y prevenir la denegación de servicio por bloqueo
+                    accidental.
                 </td>
             </tr>
             <tr>
                 <td style="text-align: center; vertical-align: middle;"><i data-lucide="eye-off"></i></td>
                 <td><strong>Opacidad en Errores (Anti-Enumeración)</strong></td>
                 <td>
-                    El sistema responde con <code>http.StatusForbidden (403)</code> genérico. 
-                    No se diferencia entre "usuario no encontrado" y "contraseña incorrecta" para evitar la <strong>Enumeración de Usuarios</strong>.
+                    El sistema responde con <code>http.StatusForbidden (403)</code> genérico.
+                    No se diferencia entre "usuario no encontrado" y "contraseña incorrecta" para evitar la
+                    <strong>Enumeración de Usuarios</strong>.
                 </td>
                 <td>
                     <strong>OWASP ASVS 2.1.2</strong><br>
@@ -295,7 +503,9 @@ db.intencion.createIndex({ "usuario": 1 }, { unique: true })</code></pre>
 <div class="section">
     <h2>Generación de Traza (Auditoría)</h2>
     <p>
-        El sistema cumple con el principio de <strong>No Repudio y Monitoreo Continuo</strong>. Cada intento de acceso, sea exitoso o fallido, genera un objeto <code>TrazaUser</code> que se almacena en la colección <code>traza</code>.
+        El sistema cumple con el principio de <strong>No Repudio y Monitoreo Continuo</strong>. Cada intento de acceso,
+        sea exitoso o fallido, genera un objeto <code>TrazaUser</code> que se almacena en la colección
+        <code>traza</code>.
     </p>
     <pre class="code-block"><code>traza.Fecha = time.Now()
 traza.IP = ip[0] // Capturada del RemoteAddr
@@ -305,5 +515,3 @@ _, err := c.InsertOne(system.Contexto, traza)</code></pre>
 </div>
 
 <div class="section-separator"></div>
-
-

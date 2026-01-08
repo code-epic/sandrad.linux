@@ -62,6 +62,7 @@
         // Clonamos la petición inmutable agregando las cabeceras de seguridad
         const secureReq = req.clone({
           setHeaders: {
+            'Web-Api-Key': this.API_KEY,
             'X-Signature': signature,
             'X-Timestamp': timestamp
           }
@@ -83,7 +84,10 @@
     <p>
         Cuando un atacante intercepta tu petición en <strong>Burp Suite</strong>, visualizará la siguiente estructura:
     </p>
-    <pre class="code-block"><code>Headers:
+    <pre class="code-block"><code>Method: POST 
+
+Headers:
+Web-Api-Key: d166fde7..sse
 X-Signature: d166fde7f848...
 X-Timestamp: 1766671754376
 
