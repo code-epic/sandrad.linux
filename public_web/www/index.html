@@ -1,192 +1,601 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<html lang="es" class="scroll-smooth">
 
 <head>
-  <meta charset="utf-8">
-  <meta name="x-apple-disable-message-reformatting">
-  <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
-  <title>Sandra Server</title>
-  <link
-    href="https://fonts.googleapis.com/css?family=Montserrat:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700"
-    rel="stylesheet" media="screen">
-  <style>
-    .hover-underline:hover {
-      text-decoration: underline !important;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sandra Core | Portal de Ingeniería Layer-7</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Fira+Code:wght@400;500&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Inserción de Variables del Usuario */
+        :root {
+            --sidebar-width: 240px;
+            --right-sidebar-width: 260px;
+            --accent-purple: #66BB6A;
+            --accent-blue: #A5D6A7;
+            --bg-alpha: #F4F6F8;
+            --text-main: #455A64;
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --pastel-green-bg: #E8F5E9;
+            --pastel-green-text: #2E7D32;
+            --pastel-green-hover: #C8E6C9;
+            --danger-color: #FF5252;
+            --warning-color: #FFA000;
+            --mongo-dark: #001e2b;
+        }
 
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-alpha);
+            color: var(--text-main);
+            overflow-y: auto;
+        }
 
-    @keyframes ping {
+        .glass-header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border);
+        }
 
-      75%,
-      100% {
-        transform: scale(2);
-        opacity: 0;
-      }
-    }
+        .hero-mesh {
+            background-color: #e5e5f7;
+            background-image: radial-gradient(#66BB6A 0.5px, transparent 0.5px), radial-gradient(#66BB6A 0.5px, #f4f6f8 0.5px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+        }
 
-    @keyframes pulse {
-      50% {
-        opacity: .5;
-      }
-    }
+        .pillar-card {
+            background: white;
+            border: 1px solid #E1E5E8;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
 
-    @keyframes bounce {
+        .pillar-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(102, 187, 106, 0.15);
+            border-color: var(--accent-purple);
+        }
 
-      0%,
-      100% {
-        transform: translateY(-25%);
-        animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
-      }
+        .code-snippet {
+            background: var(--mongo-dark);
+            color: #A5D6A7;
+            font-family: 'Fira Code', monospace;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
 
-      50% {
-        transform: none;
-        animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
-      }
-    }
+        .tech-tag {
+            background: var(--pastel-green-bg);
+            color: var(--pastel-green-text);
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
 
-    @media (max-width: 600px) {
-      .sm-px-24 {
-        padding-left: 24px !important;
-        padding-right: 24px !important;
-      }
+        /* Animaciones */
+        .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease-out;
+        }
 
-      .sm-py-32 {
-        padding-top: 32px !important;
-        padding-bottom: 32px !important;
-      }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
 
-      .sm-w-full {
-        width: 100% !important;
-      }
-    }
-  </style>
+        .mascot-float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(2deg);
+            }
+
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+        }
+    </style>
 </head>
 
-<body
-  style="margin: 0; padding: 0; width: 100%; word-break: break-word; -webkit-font-smoothing: antialiased; --bg-opacity: 1; background-color: #eceff1; background-color: rgba(236, 239, 241, var(--bg-opacity));">
+<body>
 
-  <div role="article" aria-roledescription="email" aria-label="Reset your Password" lang="en">
-    <table style="font-family: Montserrat, -apple-system, 'Segoe UI', sans-serif; width: 100%;" width="100%"
-      cellpadding="0" cellspacing="0" role="presentation">
-      <tr>
-        <td align="center"
-          style="--bg-opacity: 1; background-color: #eceff1; background-color: rgba(236, 239, 241, var(--bg-opacity)); font-family: Montserrat, -apple-system, 'Segoe UI', sans-serif;"
-          bgcolor="rgba(236, 239, 241, var(--bg-opacity))">
-          <table class="sm-w-full" style="font-family: 'Montserrat',Arial,sans-serif; width: 600px;" width="600"
-            cellpadding="0" cellspacing="0" role="presentation">
-            <tr>
-              <td class="sm-py-32 sm-px-24"
-                style="font-family: Montserrat, -apple-system, 'Segoe UI', sans-serif; padding: 48px; text-align: center;"
-                align="center">
+    <!-- Header / Navigation -->
+    <nav class="fixed w-full z-50 glass-header">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <img src="img/sandra.png" alt="Sandra Logo" class="w-10 h-10 rounded-full border-2 border-green-500">
+                <div class="flex flex-col">
+                    <span class="text-xl font-extrabold tracking-tighter text-slate-800">SANDRA<span
+                            class="text-green-600">CORE</span></span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Portal
+                        Científico v1.0</span>
+                </div>
+            </div>
+            <div class="hidden lg:flex space-x-8 items-center text-sm font-semibold">
+                <a href="#server" class="hover:text-green-600 transition">SERVER</a>
+                <a href="#sentinel" class="hover:text-green-600 transition">SENTINEL</a>
+                <a href="#sdc" class="hover:text-green-600 transition">CONTAINER</a>
+                <a href="#ui" class="hover:text-green-600 transition">UI CONSOLE</a>
+                <a href="#licensing" class="hover:text-green-600 transition">LICENCIA</a>
+                <a href="#layer7"
+                    class="bg-green-600 text-white px-4 py-2 rounded-lg hover:shadow-lg transition shadow-green-200">LAYER-7
+                    EXPLORER</a>
+            </div>
+        </div>
+    </nav>
 
-              </td>
-            </tr>
-            <tr>
-              <td align="center" class="sm-px-24" style="font-family: 'Montserrat',Arial,sans-serif;">
-                <table style="font-family: 'Montserrat',Arial,sans-serif; width: 100%;" width="100%" cellpadding="0"
-                  cellspacing="0" role="presentation">
-                  <tr>
+    <!-- Hero Section -->
+    <header class="pt-32 pb-20 hero-mesh">
+        <div class="container mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
+            <div class="reveal">
+                <div
+                    class="inline-flex items-center space-x-2 bg-white border border-green-200 px-3 py-1 rounded-full mb-6">
+                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    <span class="text-xs font-bold text-green-700 uppercase tracking-widest">Orquestación de Grado
+                        Militar</span>
+                </div>
+                <h1 class="text-6xl font-black text-slate-800 leading-none mb-6">
+                    Ecosistema <br> <span class="text-green-600">Soberano</span> de <br> Infraestructura.
+                </h1>
+                <p class="text-lg text-slate-500 max-w-lg mb-8 leading-relaxed">
+                    Un sistema distribuido determinista diseñado en <strong>Go</strong> y <strong>Rust</strong>. Sandra
+                    trasciende el middleware tradicional para convertirse en un <strong>Sistema Operativo de Capa
+                        7</strong> que gobierna la interoperabilidad global.
+                </p>
+                <div class="flex space-x-4">
+                    <button
+                        class="bg-slate-800 text-white px-8 py-4 rounded-xl font-bold hover:bg-slate-700 transition shadow-2xl">Descargar
+                        Whitepaper</button>
+                    <button
+                        class="bg-white border-2 border-green-500 text-green-600 px-8 py-4 rounded-xl font-bold hover:bg-green-50 transition">Explorar
+                        gRPC Stream</button>
+                </div>
+            </div>
+            <div class="relative flex justify-center reveal">
+                <div class="absolute inset-0 bg-green-400/10 blur-[120px] rounded-full"></div>
+                <img src="img/sandra.png" alt="Mascot" class="w-96 mascot-float relative z-10 drop-shadow-2xl">
+            </div>
+        </div>
+    </header>
 
-                    <td class="sm-px-24"
-                      style="--bg-opacity: 1; background-color: #ffffff; background-color: rgba(255, 255, 255, var(--bg-opacity)); border-radius: 4px; font-family: Montserrat, -apple-system, 'Segoe UI', sans-serif; font-size: 14px; line-height: 24px; padding: 48px; text-align: left; --text-opacity: 1; color: #626262; color: rgba(98, 98, 98, var(--text-opacity));"
-                      bgcolor="rgba(255, 255, 255, var(--bg-opacity))" align="left">
-                      <center>
-                        <img src="logo.png" width="155" alt="Vuexy Admin"
-                          style="border: 0;  max-width: 100%; line-height: 100%; vertical-align: middle;">
-                      </center>
+    <!-- Explicación de Capa 7 (Scientific Context) -->
+    <section id="layer7" class="py-24 bg-white border-y border-slate-100">
+        <div class="container mx-auto px-6">
+            <div class="max-w-4xl mx-auto text-center mb-20 reveal">
+                <div class="max-w-5xl mx-auto text-center mb-24 reveal">
+                    <h2 class="text-5xl font-black text-slate-800 mb-8 tracking-tighter uppercase">La Relevancia de la
+                        <span class="text-green-600 italic">Capa 7</span></h2>
+                    <div class="h-1.5 w-24 bg-green-500 mx-auto mb-10 rounded-full"></div>
+                    <p class="text-xl text-slate-500 leading-relaxed font-medium">
+                        Mientras los sistemas operativos tradicionales gestionan hardware y controladores, Sandra
+                        gestiona <strong>intenciones y relaciones lógicas</strong>. En la arquitectura de red, la Capa 7
+                        (Aplicación) es donde reside la inteligencia del negocio.
+                    </p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+                    <div
+                        class="p-10 bg-slate-50 rounded-[2.5rem] border border-slate-200 reveal transition hover:bg-white hover:shadow-xl">
+                        <div
+                            class="w-14 h-14 bg-green-100 text-green-700 rounded-2xl flex items-center justify-center mb-8">
+                            <i data-lucide="layers"></i></div>
+                        <h4 class="text-2xl font-black text-slate-800 mb-4">Abstracción Lógica</h4>
+                        <p class="text-slate-500 text-sm leading-relaxed font-medium">Oculta la heterogeneidad de redes,
+                            sistemas operativos y lenguajes (PHP, Go, Rust), permitiendo una comunicación fluida
+                            mediante una Capa Común (Interlogical).</p>
+                    </div>
+                    <div class="p-10 bg-slate-50 rounded-[2.5rem] border border-slate-200 reveal transition hover:bg-white hover:shadow-xl"
+                        style="transition-delay: 150ms;">
+                        <div
+                            class="w-14 h-14 bg-green-100 text-green-700 rounded-2xl flex items-center justify-center mb-8">
+                            <i data-lucide="brain"></i></div>
+                        <h4 class="text-2xl font-black text-slate-800 mb-4">Orquestación de Intención</h4>
+                        <p class="text-slate-500 text-sm leading-relaxed font-medium">Sandra no solo mueve datos; los
+                            interpreta. Decide flujos, valida contextos de dispositivos y sincroniza estados en tiempo
+                            real basándose en la intención de la transacción.</p>
+                    </div>
+                    <div class="p-10 bg-slate-50 rounded-[2.5rem] border border-slate-200 reveal transition hover:bg-white hover:shadow-xl"
+                        style="transition-delay: 300ms;">
+                        <div
+                            class="w-14 h-14 bg-green-100 text-green-700 rounded-2xl flex items-center justify-center mb-8">
+                            <i data-lucide="shield-check"></i></div>
+                        <h4 class="text-2xl font-black text-slate-800 mb-4">Zero-Trust L7</h4>
+                        <p class="text-slate-500 text-sm leading-relaxed font-medium">Cada mensaje es autenticado y
+                            autorizado individualmente. La validación no ocurre en el puerto de red, sino en la
+                            estructura profunda del mensaje (Deep Packet Logic).</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-                      <p style="font-weight: 600; font-size: 18px; margin-bottom: 0;">Hola,</p>
-                      <p
-                        style="font-weight: 700; font-size: 20px; margin-top: 0; --text-opacity: 1; color: #3f69a8;">
-                        Sandra Server</p>
-                      <p style="margin: 0 0 24px;">
-                        En informática un Bus de Servicio Empresarial es un modelo de arquitectura de software que
-                        gestiona la comunicación entre servicios web. Es un componente fundamental de la Arquitectura
-                        Orientada a Servicios.
-                      </p>
+    <!-- PILLAR 1: SANDRA SERVER (GO) -->
+    <section id="server" class="py-24 bg-slate-50">
+        <div class="container mx-auto px-6">
+            <div class="grid lg:grid-cols-2 gap-20 items-center">
+                <div class="reveal">
+                    <span class="tech-tag">El Sistema Nervioso</span>
+                    <h2 class="text-5xl font-black text-slate-800 mt-4 mb-6 uppercase">Sandra Server <br> <span
+                            class="text-green-600">Golang Core</span></h2>
+                    <p class="text-slate-500 text-lg mb-8 leading-relaxed">
+                        El núcleo de orquestación diseñado para la escalabilidad extrema. Su arquitectura **Zero-Trust**
+                        garantiza que cada bit de información sea validado, auditado y sincronizado.
+                    </p>
 
-                      <table style="font-family: 'Montserrat',Arial,sans-serif;" cellpadding="0" cellspacing="0"
-                        role="presentation">
-                        <tr>
-                          <!-- <td
-                            style="mso-padding-alt: 16px 24px; --bg-opacity: 1; background-color: #7367f0; background-color: rgba(115, 103, 240, var(--bg-opacity)); border-radius: 4px; font-family: Montserrat, -apple-system, 'Segoe UI', sans-serif;"
-                            bgcolor="rgba(115, 103, 240, var(--bg-opacity))">
-                            <a href="https://pixinvent.com?reset_password_url"
-                              style="display: block; font-weight: 600; font-size: 14px; line-height: 100%; padding: 16px 24px; --text-opacity: 1; color: #ffffff; color: rgba(255, 255, 255, var(--text-opacity)); text-decoration: none;">Reset
-                              Password &rarr;</a>
-                          </td> -->
-                        </tr>
-                      </table>
-                      
-                      <table style="font-family: 'Montserrat',Arial,sans-serif; width: 100%;" width="100%"
-                        cellpadding="0" cellspacing="0" role="presentation">
-                        <tr>
-                          <td
-                            style="font-family: 'Montserrat',Arial,sans-serif; padding-top: 32px; padding-bottom: 32px;">
+                    <div class="space-y-6">
+                        <div class="p-6 pillar-card rounded-2xl flex gap-4">
                             <div
-                              style="--bg-opacity: 1; background-color: #eceff1; background-color: rgba(236, 239, 241, var(--bg-opacity)); height: 1px; line-height: 1px;">
-                              &zwnj;</div>
-                          </td>
-                        </tr>
-                      </table>
-                      <p style="margin: 0 0 16px;">
-                        Conozca las especialidades en desarrollo y negocios que lo ayudaran a mejorar sus productos y lanzarlos en los nuevos mercados emergentes.
-                        <a href="https://code-epic.github.io" class="hover-underline"
-                          style="--text-opacity: 1; color: #7367f0; color: rgba(115, 103, 240, var(--text-opacity)); text-decoration: none;">Ir a https://code-epic.github.io</a>.
-                      </p>
-                      <p style="margin: 0 0 16px;">Gracias, <br>Code Epic Technologies</p>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="font-family: 'Montserrat',Arial,sans-serif; height: 20px;" height="20"></td>
-                  </tr>
-                  <tr>
-                    <td
-                      style="font-family: Montserrat, -apple-system, 'Segoe UI', sans-serif; font-size: 12px; padding-left: 48px; padding-right: 48px; --text-opacity: 1; color: #eceff1; color: rgba(236, 239, 241, var(--text-opacity));">
-                      <p align="center" style="cursor: default; margin-bottom: 16px;">
-                        <a href="https://www.facebook.com/code-epic"
-                          style="--text-opacity: 1; color: #263238; color: rgba(38, 50, 56, var(--text-opacity)); text-decoration: none;"><img
-                            src="facebook.png" width="17" alt="Facebook"
-                            style="border: 0; max-width: 100%; line-height: 100%; vertical-align: middle; margin-right: 12px;"></a>
-                        &bull;
-                        <a href="https://twitter.com/code-epic"
-                          style="--text-opacity: 1; color: #263238; color: rgba(38, 50, 56, var(--text-opacity)); text-decoration: none;"><img
-                            src="twitter.png" width="17" alt="Twitter"
-                            style="border: 0; max-width: 100%; line-height: 100%; vertical-align: middle; margin-right: 12px;"></a>
-                        &bull;
-                        <a href="https://www.instagram.com/code-epic"
-                          style="--text-opacity: 1; color: #263238; color: rgba(38, 50, 56, var(--text-opacity)); text-decoration: none;"><img
-                            src="instagram.png" width="17" alt="Instagram"
-                            style="border: 0; max-width: 100%; line-height: 100%; vertical-align: middle; margin-right: 12px;"></a>
-                      </p>
-                      <p style=" text-align: center; --text-opacity: 1; color: #263238; color: rgba(38, 50, 56, var(--text-opacity));">
-                        El uso de nuestro servicio y sitio web está sujeto a nuestros <br>
-                        <a href="https://code-epic.com/" class="hover-underline"
-                          style="--text-opacity: 1; color: #7367f0; color: rgba(115, 103, 240, var(--text-opacity)); text-decoration: none;">Términos de uso
-                          </a> y
-                        <a href="https://code-epic.com/" class="hover-underline"
-                          style="--text-opacity: 1; color: #7367f0; color: rgba(115, 103, 240, var(--text-opacity)); text-decoration: none;">Política de privacidad </a>.
-                      </p>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="font-family: 'Montserrat',Arial,sans-serif; height: 16px;" height="16"></td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-  </div>
+                                class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600">
+                                <i data-lucide="share-2"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800">WSHub: Sharding (256 Shards)</h4>
+                                <p class="text-xs text-slate-500 mt-1">Elimina bloqueos de CPU distribuyendo cientos de
+                                    miles de conexiones en fragmentos independientes, logrando latencia cercana a cero.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="p-6 pillar-card rounded-2xl flex gap-4">
+                            <div
+                                class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600">
+                                <i data-lucide="file-check"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800">ModulosAPP: CDN & PDF Engine</h4>
+                                <p class="text-xs text-slate-500 mt-1">Ingeniería documental con encriptación al vuelo,
+                                    esteganografía para trazabilidad forense y firmas digitales inmutables.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="reveal">
+                    <div class="code-snippet">
+                        <div class="flex space-x-2 mb-4">
+                            <div class="w-3 h-3 bg-red-400 rounded-full"></div>
+                            <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                            <div class="w-3 h-3 bg-green-400 rounded-full"></div>
+                        </div>
+                        <pre class="text-sm leading-relaxed"><code><span class="text-purple-400">package</span> core
+
+<span class="text-green-400">// WSHub Orchestration Logic</span>
+<span class="text-blue-400">func</span> (h *Hub) <span class="text-yellow-400">HandleSharding</span>(id <span class="text-blue-400">string</span>) *Shard {
+    shardID := <span class="text-yellow-400">calculateHash</span>(id) % <span class="text-orange-400">256</span>
+    <span class="text-purple-400">return</span> h.Shards[shardID]
+}
+
+<span class="text-blue-400">func</span> (h *Hub) <span class="text-yellow-400">SyncSessions</span>() {
+    <span class="text-green-400">// Audit and repair inconsistencies in RT</span>
+    <span class="text-yellow-400">SyncDatabaseSessions</span>()
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PILLAR 2: SANDRA SENTINEL (RUST) -->
+    <section id="sentinel" class="py-24 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16 reveal">
+                <span class="tech-tag">El Músculo Computacional</span>
+                <h2 class="text-5xl font-black text-slate-800 mt-4 mb-4 uppercase">Sandra Sentinel</h2>
+                <p class="text-slate-500 text-xl max-w-2xl mx-auto italic">"Fusión determinista masiva en milisegundos."
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 mb-20">
+                <div class="p-8 bg-slate-50 rounded-[2rem] border border-slate-100 reveal">
+                    <div
+                        class="w-16 h-16 bg-white shadow-sm rounded-2xl flex items-center justify-center text-green-600 mb-6">
+                        <i data-lucide="zap" class="w-8 h-8"></i>
+                    </div>
+                    <h4 class="font-black text-slate-800 text-xl mb-3">In-Memory Hash Join</h4>
+                    <p class="text-sm text-slate-500 leading-relaxed">
+                        Implementa algoritmos de <strong>Build & Probe</strong> para unir 500k+ registros en RAM. Evita
+                        la latencia de disco de la DB tradicional, logrando un throughput de ~500k registros/segundo.
+                    </p>
+                </div>
+                <div class="p-8 bg-slate-50 rounded-[2rem] border border-slate-100 reveal">
+                    <div
+                        class="w-16 h-16 bg-white shadow-sm rounded-2xl flex items-center justify-center text-green-600 mb-6">
+                        <i data-lucide="layers-3" class="w-8 h-8"></i>
+                    </div>
+                    <h4 class="font-black text-slate-800 text-xl mb-3">Async Pipeline</h4>
+                    <p class="text-sm text-slate-500 leading-relaxed">
+                        Arquitectura de tubería que descarga el Lote N+1 mientras procesa el Lote N. Cero tiempos
+                        muertos. El back-pressure inteligente protege la integridad del sistema.
+                    </p>
+                </div>
+                <div class="p-8 bg-slate-50 rounded-[2rem] border border-slate-100 reveal">
+                    <div
+                        class="w-16 h-16 bg-white shadow-sm rounded-2xl flex items-center justify-center text-green-600 mb-6">
+                        <i data-lucide="binary" class="w-8 h-8"></i>
+                    </div>
+                    <h4 class="font-black text-slate-800 text-xl mb-3">SIMD JSON Parsing</h4>
+                    <p class="text-sm text-slate-500 leading-relaxed">
+                        Uso de instrucciones vectoriales de CPU para mapear bytes crudos directamente a estructuras de
+                        Rust (Zero-Copy). Rendimiento bruto optimizado al metal.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Manifiesto de Ejecución -->
+            <div
+                class="bg-slate-900 rounded-[3rem] p-12 text-white flex flex-col lg:flex-row gap-12 items-center reveal">
+                <div class="lg:w-1/2">
+                    <h3 class="text-3xl font-black mb-6">Ejecución Controlada vía <span
+                            class="text-green-400">Manifiestos</span></h3>
+                    <p class="text-slate-400 mb-8 leading-relaxed">
+                        Sentinel no es una caja negra. A través de manifiestos JSON dinámicos, el auditor puede inyectar
+                        filtros SQL, límites y reglas de negocio al vuelo sin recompilar el núcleo, permitiendo
+                        auditorías granulares y seguras.
+                    </p>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="border-l-2 border-green-500 pl-4">
+                            <span class="text-2xl font-black text-white">1.2s</span>
+                            <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Fusión Completa
+                            </p>
+                        </div>
+                        <div class="border-l-2 border-green-500 pl-4">
+                            <span class="text-2xl font-black text-white">0%</span>
+                            <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Fugas de Memoria
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:w-1/2 w-full">
+                    <div class="bg-slate-800 p-6 rounded-2xl shadow-inner border border-slate-700">
+                        <pre class="text-xs font-mono text-green-200"><code>{
+  "nombre": "Nómina Enero 2026",
+  "ciclo": "2026-01",
+  "filtros": {
+    "status": 201,
+    "grado": "Oficial"
+  },
+  "modulos": ["Base", "Directiva", "Primas"]
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PILLAR 3: SANDRA SDC (RUST/ANGULAR) -->
+    <section id="sdc" class="py-24 bg-slate-50">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col lg:flex-row gap-20 items-center">
+                <div class="lg:w-1/2 reveal">
+                    <div class="relative">
+                        <div class="absolute inset-0 bg-green-500/20 blur-[100px] rounded-full"></div>
+                        <div class="bg-white p-4 rounded-[2.5rem] shadow-2xl relative z-10 border border-slate-200">
+                            <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=1000"
+                                alt="Code" class="rounded-[2rem]">
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:w-1/2 reveal">
+                    <span class="tech-tag">El Búnker Seguro</span>
+                    <h2 class="text-5xl font-black text-slate-800 mt-4 mb-6 uppercase">Sandra Desktop <br> <span
+                            class="text-green-600">Container</span></h2>
+                    <p class="text-slate-500 text-lg mb-8 leading-relaxed">
+                        SDC es un entorno de ejecución **Memory-Safe** que aísla micro-aplicaciones. Al eliminar el
+                        runtime de Node y usar Tauri/Rust, creamos un perímetro de defensa infranqueable en el endpoint.
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div class="p-4 bg-white rounded-xl border border-slate-200">
+                            <h5 class="font-bold text-slate-800">Argon2id</h5>
+                            <p class="text-[10px] text-slate-400 uppercase">Hasing de credenciales resistente a GPU.</p>
+                        </div>
+                        <div class="p-4 bg-white rounded-xl border border-slate-200">
+                            <h5 class="font-bold text-slate-800">SQLite Cipher</h5>
+                            <p class="text-[10px] text-slate-400 uppercase">Persistencia AES-256-GCM Local-First.</p>
+                        </div>
+                        <div class="p-4 bg-white rounded-xl border border-slate-200">
+                            <h5 class="font-bold text-slate-800">sandra-app://</h5>
+                            <p class="text-[10px] text-slate-400 uppercase">Protocolo aislado para micro-frontends.</p>
+                        </div>
+                        <div class="p-4 bg-white rounded-xl border border-slate-200">
+                            <h5 class="font-bold text-slate-800">Hot-Patching</h5>
+                            <p class="text-[10px] text-slate-400 uppercase">Inyección de seguridad en apps legacy.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PILLAR 4: SANDRA UI (ANGULAR SRE) -->
+    <section id="ui" class="py-24 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="max-w-4xl mx-auto text-center reveal">
+                <span class="tech-tag">El Centro de Comando</span>
+                <h2 class="text-5xl font-black text-slate-800 mt-4 mb-6 uppercase">Sandra UI Consola</h2>
+                <p class="text-slate-500 text-xl leading-relaxed mb-12">
+                    Mucho más que una consola. Es una plataforma de **Observabilidad Full-Stack** diseñada bajo
+                    principios SRE para garantizar la resiliencia operativa de ecosistemas de misión crítica.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 reveal">
+                <div class="p-8 pillar-card rounded-3xl text-center">
+                    <i data-lucide="activity" class="mx-auto text-green-600 mb-4 w-10 h-10"></i>
+                    <h5 class="font-bold text-slate-800">Heartbeat Realtime</h5>
+                    <p class="text-xs text-slate-400 mt-2">Detección de latencia y salud de nodos clúster vía gRPC.</p>
+                </div>
+                <div class="p-8 pillar-card rounded-3xl text-center">
+                    <i data-lucide="history" class="mx-auto text-green-600 mb-4 w-10 h-10"></i>
+                    <h5 class="font-bold text-slate-800">Bitácora Inmutable</h5>
+                    <p class="text-xs text-slate-400 mt-2">Trazabilidad firmada digitalmente para cumplimiento auditivo.
+                    </p>
+                </div>
+                <div class="p-8 pillar-card rounded-3xl text-center">
+                    <i data-lucide="lock" class="mx-auto text-green-600 mb-4 w-10 h-10"></i>
+                    <h5 class="font-bold text-slate-800">RBAC Granular</h5>
+                    <p class="text-xs text-slate-400 mt-2">Gestión de perfiles, roles y privilegios basados en tokens
+                        JWT.</p>
+                </div>
+                <div class="p-8 pillar-card rounded-3xl text-center">
+                    <i data-lucide="terminal" class="mx-auto text-green-600 mb-4 w-10 h-10"></i>
+                    <h5 class="font-bold text-slate-800">Debugging en Caliente</h5>
+                    <p class="text-xs text-slate-400 mt-2">Inspección de flujo de mensajes sin detener la producción.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN DE LICENCIAMIENTO ESTRATÉGICO -->
+    <section id="licensing" class="py-24 bg-slate-50 border-t border-slate-100">
+        <div class="container mx-auto px-6">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div class="reveal">
+                    <span class="tech-tag">Estrategia y Defensa</span>
+                    <h2 class="text-5xl font-black text-slate-800 mt-4 mb-6 uppercase">Licenciamiento <br> <span
+                            class="text-green-600">Soberano</span></h2>
+                    <p class="text-slate-500 text-lg mb-8 leading-relaxed">
+                        La elección de licencias en el Proyecto Sandra no es solo legal, es **estratégica**. Priorizamos
+                        licencias que garantizan la autonomía tecnológica y la protección de la propiedad intelectual en
+                        entornos críticos.
+                    </p>
+
+                    <div class="space-y-6">
+                        <div class="p-6 pillar-card rounded-2xl flex gap-4">
+                            <div
+                                class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600">
+                                <i data-lucide="shield-check" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800">Privatización de Código Derivado</h4>
+                                <p class="text-xs text-slate-500 mt-1">Las licencias permisivas permiten que
+                                    innovaciones basadas en código abierto puedan ser "privatizadas" y clasificadas,
+                                    fundamental para el sector defensa.</p>
+                            </div>
+                        </div>
+                        <div class="p-6 pillar-card rounded-2xl flex gap-4">
+                            <div
+                                class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600">
+                                <i data-lucide="lock-keyhole" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800">Cumplimiento y Clasificación</h4>
+                                <p class="text-xs text-slate-500 mt-1">Uso de Apache 2.0 y MIT para permitir que módulos
+                                    de guiado o algoritmos sensibles sean cerrados y protegidos bajo normativas de
+                                    seguridad nacional.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="reveal">
+                    <div class="bg-white p-8 rounded-[3rem] border border-slate-200 shadow-xl relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-8 opacity-10">
+                            <i data-lucide="file-text" class="w-32 h-32"></i>
+                        </div>
+                        <h4 class="text-2xl font-black text-slate-800 mb-4">Análisis de Impacto Estratégico</h4>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                                <span class="text-sm font-bold text-slate-600">Apache 2.0 / MIT</span>
+                                <span
+                                    class="text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded">Recomendado</span>
+                            </div>
+                            <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                                <span class="text-sm font-bold text-slate-600">GPL v3 / AGPL</span>
+                                <span
+                                    class="text-xs font-bold text-red-600 bg-red-100 px-2 py-1 rounded">Restringido</span>
+                            </div>
+                            <div class="mt-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-r-xl">
+                                <p class="text-xs text-green-800 leading-relaxed italic">
+                                    "Si desarrollas un módulo de guiado basado en un algoritmo abierto, una licencia
+                                    como Apache 2.0 permite que el software final sea cerrado y clasificado sin
+                                    comprometer el cumplimiento legal."
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer & Reflexión Científica -->
+    <footer class="bg-slate-900 text-white py-24 border-t-8 border-green-600">
+        <div class="container mx-auto px-6">
+            <div class="grid lg:grid-cols-3 gap-16 mb-20">
+                <div class="col-span-1">
+                    <div class="flex items-center space-x-3 mb-8">
+                        <span class="text-3xl font-black tracking-tighter">SANDRA<span
+                                class="text-green-500">CORE</span></span>
+                    </div>
+                    <p class="text-slate-400 leading-relaxed italic border-l-2 border-green-700 pl-4 mb-8">
+                        "La convergencia Go-Rust en Sandra no es solo técnica; es una respuesta ética a la fragilidad
+                        del software moderno. Es la construcción de permanencia en un mundo de código efímero."
+                    </p>
+                </div>
+                <div class="grid grid-cols-2 gap-8 col-span-2">
+                    <div>
+                        <h6 class="text-green-500 font-bold uppercase tracking-widest text-xs mb-6">Arquitectura</h6>
+                        <ul class="space-y-4 text-sm text-slate-500 font-medium">
+                            <li><a href="#" class="hover:text-white transition">WSHub Orchestration</a></li>
+                            <li><a href="#" class="hover:text-white transition">ExecPipe Secure Engine</a></li>
+                            <li><a href="#" class="hover:text-white transition">In-Memory Computing</a></li>
+                            <li><a href="#" class="hover:text-white transition">Argon2id Implementation</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h6 class="text-green-500 font-bold uppercase tracking-widest text-xs mb-6">Gobernanza ISO</h6>
+                        <ul class="space-y-4 text-sm text-slate-500 font-medium">
+                            <li>ISO/IEC 27001 (SGSI)</li>
+                            <li>ISO 22301 (Resiliencia)</li>
+                            <li>ISO 25010 (Calidad)</li>
+                            <li>Ley de Infogobierno VZLA</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div
+                class="pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center text-xs text-slate-500 uppercase font-bold tracking-[0.2em]">
+                <span>© 2024-2026 PROYECTO SANDRA - CARLOS PEÑA</span>
+                <span class="mt-4 md:mt-0">POTENCIADO POR RUST, GO & INTELIGENCIA DETERMINISTA</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Inicializar Iconos
+        lucide.createIcons();
+
+        // Lógica de Revelación al Scroll
+        const observerOptions = { threshold: 0.1 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // Inyectar funcionalidad de búsqueda simulada para el portal
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'k' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                console.log("Comando de búsqueda de Nexus activado...");
+            }
+        });
+    </script>
 </body>
 
 </html>
