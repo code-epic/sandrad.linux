@@ -1,192 +1,404 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<html lang="es">
 
 <head>
-  <meta charset="utf-8">
-  <meta name="x-apple-disable-message-reformatting">
-  <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
-  <title>Error - Sandra Server</title>
-  <link
-    href="https://fonts.googleapis.com/css?family=Montserrat:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700"
-    rel="stylesheet" media="screen">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acceso Restringido</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    .hover-underline:hover {
-      text-decoration: underline !important;
+    :root {
+      --bg-deep: #080c10;
+      --bg-card: rgba(255, 255, 255, 0.035);
+      --bg-section: rgba(255, 255, 255, 0.025);
+      --gold: #c9a84c;
+      --gold-soft: rgba(201, 168, 76, 0.18);
+      --amber: #e07b54;
+      --amber-soft: rgba(224, 123, 84, 0.12);
+      --text-main: #cdd6e0;
+      --text-muted: #6b7c93;
+      --text-dim: #3e4f63;
+      --border: rgba(201, 168, 76, 0.15);
+      --border-dim: rgba(255, 255, 255, 0.06);
     }
 
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
-    @keyframes ping {
+    body {
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg-deep);
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% 0%, rgba(201, 168, 76, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(15, 25, 40, 0.8) 0%, transparent 70%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
 
-      75%,
-      100% {
-        transform: scale(2);
-        opacity: 0;
-      }
+    .panel {
+      width: 100%;
+      max-width: 720px;
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.4),
+        0 32px 80px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    /* ── Header ── */
+    .panel-header {
+      padding: 2.5rem 2.5rem 2rem;
+      border-bottom: 1px solid var(--border-dim);
+      display: flex;
+      align-items: flex-start;
+      gap: 1.25rem;
+    }
+
+    .shield-wrap {
+      flex-shrink: 0;
+      width: 52px;
+      height: 52px;
+      background: var(--gold-soft);
+      border: 1px solid rgba(201, 168, 76, 0.25);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .shield-wrap svg {
+      width: 28px;
+      height: 28px;
+      fill: var(--gold);
+      animation: pulse 4s ease-in-out infinite;
     }
 
     @keyframes pulse {
-      50% {
-        opacity: .5;
-      }
-    }
-
-    @keyframes bounce {
 
       0%,
       100% {
-        transform: translateY(-25%);
-        animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+        opacity: 1;
       }
 
       50% {
-        transform: none;
-        animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+        opacity: 0.6;
       }
     }
 
-    @media (max-width: 600px) {
-      .sm-px-24 {
-        padding-left: 24px !important;
-        padding-right: 24px !important;
+    .header-text h1 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--gold);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 0.3rem;
+    }
+
+    .header-text p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 400;
+      line-height: 1.5;
+    }
+
+    .status-badge {
+      margin-left: auto;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--amber-soft);
+      border: 1px solid rgba(224, 123, 84, 0.25);
+      border-radius: 20px;
+      padding: 0.3rem 0.75rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--amber);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      align-self: flex-start;
+    }
+
+    .status-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: var(--amber);
+      border-radius: 50%;
+      animation: blink 2s step-end infinite;
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1;
       }
 
-      .sm-py-32 {
-        padding-top: 32px !important;
-        padding-bottom: 32px !important;
+      50% {
+        opacity: 0.2;
       }
+    }
 
-      .sm-w-full {
-        width: 100% !important;
-      }
+    /* ── Body ── */
+    .panel-body {
+      padding: 2rem 2.5rem;
+    }
+
+    .info-block {
+      background: var(--bg-section);
+      border: 1px solid var(--border-dim);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
+      font-size: 0.875rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+    }
+
+    .info-block strong {
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    /* ── Legal section ── */
+    .legal-title {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+      padding-left: 0.25rem;
+    }
+
+    .legal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .norm-card {
+      background: var(--bg-section);
+      border: 1px solid var(--border-dim);
+      border-radius: 8px;
+      padding: 1rem 1.1rem;
+    }
+
+    .norm-card .norm-ref {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+    }
+
+    .norm-card .norm-title {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-main);
+      margin-bottom: 0.25rem;
+    }
+
+    .norm-card .norm-desc {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* ── Alert strip ── */
+    .alert-strip {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.85rem;
+      background: var(--amber-soft);
+      border: 1px solid rgba(224, 123, 84, 0.2);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.75rem;
+      font-size: 0.8rem;
+      color: #c47a5a;
+      line-height: 1.6;
+    }
+
+    .alert-strip svg {
+      width: 18px;
+      height: 18px;
+      fill: var(--amber);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ── Actions ── */
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 0.7rem 1.5rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-align: center;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: none;
+      display: inline-block;
+    }
+
+    .btn-primary {
+      background: var(--gold);
+      color: #0d0a00;
+    }
+
+    .btn-primary:hover {
+      background: #d4b45a;
+      box-shadow: 0 4px 20px rgba(201, 168, 76, 0.25);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border-dim);
+    }
+
+    .btn-ghost:hover {
+      color: var(--text-main);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    /* ── Footer ── */
+    .panel-footer {
+      padding: 1rem 2.5rem 1.25rem;
+      border-top: 1px solid var(--border-dim);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-brand {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .footer-id {
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.05em;
     }
   </style>
 </head>
 
-<body
-  style="margin: 0; padding: 0; width: 100%; word-break: break-word; -webkit-font-smoothing: antialiased; --bg-opacity: 1; background-color: #eceff1; background-color: rgba(236, 239, 241, var(--bg-opacity));">
+<body>
+  <div class="panel">
 
-  <div role="article" aria-roledescription="email" aria-label="Reset your Password" lang="en">
-    <table style="font-family: Montserrat, -apple-system, 'Segoe UI', sans-serif; width: 100%;" width="100%"
-      cellpadding="0" cellspacing="0" role="presentation">
-      <tr>
-        <td align="center"
-          style="--bg-opacity: 1; background-color: #eceff1; background-color: rgba(236, 239, 241, var(--bg-opacity)); font-family: Montserrat, -apple-system, 'Segoe UI', sans-serif;"
-          bgcolor="rgba(236, 239, 241, var(--bg-opacity))">
-          <table class="sm-w-full" style="font-family: 'Montserrat',Arial,sans-serif; width: 600px;" width="600"
-            cellpadding="0" cellspacing="0" role="presentation">
-            <tr>
-              <td class="sm-py-32 sm-px-24"
-                style="font-family: Montserrat, -apple-system, 'Segoe UI', sans-serif; padding: 48px; text-align: center;"
-                align="center">
+    <!-- Header -->
+    <div class="panel-header">
+      <div class="shield-wrap">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.41-3.04 8.52-7 9.82-3.96-1.3-7-5.41-7-9.82V6.3l7-3.12z" />
+        </svg>
+      </div>
+      <div class="header-text">
+        <h1>Acceso Restringido</h1>
+        <p>No tienes autorización para acceder a este recurso del sistema Sandra Server.<br>El incidente ha sido
+          registrado automáticamente.</p>
+      </div>
+      <span class="status-badge">Incidente Activo</span>
+    </div>
 
-              </td>
-            </tr>
-            <tr>
-              <td align="center" class="sm-px-24" style="font-family: 'Montserrat',Arial,sans-serif;">
-                <table style="font-family: 'Montserrat',Arial,sans-serif; width: 100%;" width="100%" cellpadding="0"
-                  cellspacing="0" role="presentation">
-                  <tr>
+    <!-- Body -->
+    <div class="panel-body">
 
-                    <td class="sm-px-24"
-                      style="--bg-opacity: 1; background-color: #ffffff; background-color: rgba(255, 255, 255, var(--bg-opacity)); border-radius: 4px; font-family: Montserrat, -apple-system, 'Segoe UI', sans-serif; font-size: 14px; line-height: 24px; padding: 48px; text-align: left; --text-opacity: 1; color: #626262; color: rgba(98, 98, 98, var(--text-opacity));"
-                      bgcolor="rgba(255, 255, 255, var(--bg-opacity))" align="left">
-                      <center>
-                        <img src="logo.png" width="155" alt="Vuexy Admin"
-                          style="border: 0;  max-width: 100%; line-height: 100%; vertical-align: middle;">
-                      </center>
+      <div class="info-block">
+        El sistema ha identificado un intento de acceso a un <strong>segmento de red restringido o inexistente</strong>.
+        Las plataformas bajo administración de Sandra Server operan con monitoreo continuo de tráfico entrante.
+        Toda actividad irregular queda <strong>registrada, trazada y vinculada a tu sesión de red</strong>.
+      </div>
 
-                      <p style="font-weight: 600; font-size: 18px; margin-bottom: 0;">Hola, </p>
-                      <p
-                        style="font-weight: 700; font-size: 20px; margin-top: 0; --text-opacity: 1; color: #ff5850; color: rgba(255, 88, 80, var(--text-opacity));">
-                        Sandra Server - Error 403</p>
-                      <p style="margin: 0 0 24px;">
-                        En informática un Bus de Servicio Empresarial es un modelo de arquitectura de software que
-                        gestiona la comunicación entre servicios web. Es un componente fundamental de la Arquitectura
-                        Orientada a Servicios.
-                      </p>
+      <p class="legal-title">Marco Legal Aplicable</p>
+      <div class="legal-grid">
+        <div class="norm-card">
+          <div class="norm-ref">LECDI · Art. 6</div>
+          <div class="norm-title">Acceso indebido</div>
+          <div class="norm-desc">Acceder sin autorización a sistemas informáticos ajenos está penado con prisión de 1 a
+            5 años.</div>
+        </div>
+        <div class="norm-card">
+          <div class="norm-ref">LECDI · Art. 7</div>
+          <div class="norm-title">Sabotaje de sistemas</div>
+          <div class="norm-desc">Interferir en el funcionamiento de redes o sistemas conlleva penas agravadas de hasta
+            10 años.</div>
+        </div>
+        <div class="norm-card">
+          <div class="norm-ref">LECDI · Art. 9</div>
+          <div class="norm-title">Espionaje informático</div>
+          <div class="norm-desc">Obtención no autorizada de datos confidenciales es tipificado como delito grave.</div>
+        </div>
+        <div class="norm-card">
+          <div class="norm-ref">ISO/IEC 27001</div>
+          <div class="norm-title">Control de Acceso</div>
+          <div class="norm-desc">Acceso a sistemas debe ser autorizado, auditado y gestionado bajo política formal de
+            seguridad.</div>
+        </div>
+      </div>
 
-                      <table style="font-family: 'Montserrat',Arial,sans-serif;" cellpadding="0" cellspacing="0"
-                        role="presentation">
-                        <tr>
-                          <!-- <td
-                            style="mso-padding-alt: 16px 24px; --bg-opacity: 1; background-color: #7367f0; background-color: rgba(115, 103, 240, var(--bg-opacity)); border-radius: 4px; font-family: Montserrat, -apple-system, 'Segoe UI', sans-serif;"
-                            bgcolor="rgba(115, 103, 240, var(--bg-opacity))">
-                            <a href="https://pixinvent.com?reset_password_url"
-                              style="display: block; font-weight: 600; font-size: 14px; line-height: 100%; padding: 16px 24px; --text-opacity: 1; color: #ffffff; color: rgba(255, 255, 255, var(--text-opacity)); text-decoration: none;">Reset
-                              Password &rarr;</a>
-                          </td> -->
-                        </tr>
-                      </table>
-                      
-                      <table style="font-family: 'Montserrat',Arial,sans-serif; width: 100%;" width="100%"
-                        cellpadding="0" cellspacing="0" role="presentation">
-                        <tr>
-                          <td
-                            style="font-family: 'Montserrat',Arial,sans-serif; padding-top: 32px; padding-bottom: 32px;">
-                            <div
-                              style="--bg-opacity: 1; background-color: #eceff1; background-color: rgba(236, 239, 241, var(--bg-opacity)); height: 1px; line-height: 1px;">
-                              &zwnj;</div>
-                          </td>
-                        </tr>
-                      </table>
-                      <p style="margin: 0 0 16px;">
-                        Conozca las especialidades en desarrollo y negocios que lo ayudaran a mejorar sus productos y lanzarlos en los nuevos mercados emergentes.
-                        <a href="https://code-epic.github.io" class="hover-underline"
-                          style="--text-opacity: 1; color: #7367f0; color: rgba(115, 103, 240, var(--text-opacity)); text-decoration: none;">Ir a https://code-epic.github.io</a>.
-                      </p>
-                      <p style="margin: 0 0 16px;">Gracias, <br>Code Epic Technologies</p>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="font-family: 'Montserrat',Arial,sans-serif; height: 20px;" height="20"></td>
-                  </tr>
-                  <tr>
-                    <td
-                      style="font-family: Montserrat, -apple-system, 'Segoe UI', sans-serif; font-size: 12px; padding-left: 48px; padding-right: 48px; --text-opacity: 1; color: #eceff1; color: rgba(236, 239, 241, var(--text-opacity));">
-                      <p align="center" style="cursor: default; margin-bottom: 16px;">
-                        <a href="https://www.facebook.com/code-epic"
-                          style="--text-opacity: 1; color: #263238; color: rgba(38, 50, 56, var(--text-opacity)); text-decoration: none;"><img
-                            src="facebook.png" width="17" alt="Facebook"
-                            style="border: 0; max-width: 100%; line-height: 100%; vertical-align: middle; margin-right: 12px;"></a>
-                        &bull;
-                        <a href="https://twitter.com/code-epic"
-                          style="--text-opacity: 1; color: #263238; color: rgba(38, 50, 56, var(--text-opacity)); text-decoration: none;"><img
-                            src="twitter.png" width="17" alt="Twitter"
-                            style="border: 0; max-width: 100%; line-height: 100%; vertical-align: middle; margin-right: 12px;"></a>
-                        &bull;
-                        <a href="https://www.instagram.com/code-epic"
-                          style="--text-opacity: 1; color: #263238; color: rgba(38, 50, 56, var(--text-opacity)); text-decoration: none;"><img
-                            src="instagram.png" width="17" alt="Instagram"
-                            style="border: 0; max-width: 100%; line-height: 100%; vertical-align: middle; margin-right: 12px;"></a>
-                      </p>
-                      <p style=" text-align: center; --text-opacity: 1; color: #263238; color: rgba(38, 50, 56, var(--text-opacity));">
-                        El uso de nuestro servicio y sitio web está sujeto a nuestros <br>
-                        <a href="https://code-epic.com/" class="hover-underline"
-                          style="--text-opacity: 1; color: #7367f0; color: rgba(115, 103, 240, var(--text-opacity)); text-decoration: none;">Términos de uso
-                          </a> y
-                        <a href="https://code-epic.com/" class="hover-underline"
-                          style="--text-opacity: 1; color: #7367f0; color: rgba(115, 103, 240, var(--text-opacity)); text-decoration: none;">Política de privacidad </a>.
-                      </p>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="font-family: 'Montserrat',Arial,sans-serif; height: 16px;" height="16"></td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
+      <div class="alert-strip">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2L1 21h22L12 2zm0 3.5L20.5 19h-17L12 5.5zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z" />
+        </svg>
+        <span>
+          Ley Especial Contra los Delitos Informáticos (LECDI, G.O. N° 37.313 del 30/10/2001) · Convenio de Budapest
+          sobre Ciberdelincuencia · ISO/IEC 27002:2022 – Controles de Seguridad de la Información.
+        </span>
+      </div>
+
+      <div class="actions">
+        <a href="/" class="btn btn-primary">Volver al Inicio</a>
+        <a href="javascript:void(0)"
+          onclick="window.close(); if(!window.closed) window.location.href='https://www.google.com';"
+          class="btn btn-ghost">Salir del sitio</a>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="panel-footer">
+      <span class="footer-brand">SANDRA SECURITY LAYER · MONITORING ACTIVE</span>
+      <span class="footer-id" id="sid"></span>
+    </div>
+
   </div>
+  <script>
+    // Generar un ID de incidente único para trazabilidad
+    const ts = Date.now().toString(36).toUpperCase();
+    const rnd = Math.random().toString(36).slice(2, 7).toUpperCase();
+    document.getElementById('sid').textContent = 'INC-' + ts + '-' + rnd;
+  </script>
 </body>
 
 </html>
