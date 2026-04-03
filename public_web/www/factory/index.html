@@ -1,0 +1,1891 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SandraFactory - Fábrica de Software</title>
+    
+    <!-- Mermaid JS -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ============================================
+           TEMA MONGODB STYLE - CLARO
+           Inspirado en mongodb.com
+           ============================================ */
+        :root {
+            /* MongoDB Green Palette */
+            --mongo-green: #00ED64;
+            --mongo-green-dark: #13AA52;
+            --mongo-green-darker: #0B8945;
+            --mongo-green-light: #E8F5E9;
+            --mongo-green-muted: #4CAF50;
+            
+            /* Backgrounds - Mayormente claros */
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F7F9FA;
+            --bg-tertiary: #EDF1F3;
+            --bg-card: #FFFFFF;
+            --bg-dark: #1E2D3D;
+            
+            /* Text */
+            --text-primary: #1E2D3D;
+            --text-secondary: #5F6B7A;
+            --text-muted: #8996A3;
+            --text-inverse: #FFFFFF;
+            
+            /* Borders */
+            --border-light: #E6EBED;
+            --border-medium: #D0D7DE;
+            
+            /* Accents */
+            --accent-blue: #0069CA;
+            --accent-orange: #F9690E;
+            --accent-red: #D32F2F;
+            
+            /* Spacing */
+            --space-xs: 0.25rem;
+            --space-sm: 0.5rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --space-xl: 2rem;
+            --space-2xl: 3rem;
+            --space-3xl: 4rem;
+            
+            /* Borders */
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 3px rgba(30,45,61,0.08);
+            --shadow-md: 0 4px 12px rgba(30,45,61,0.1);
+            --shadow-lg: 0 8px 24px rgba(30,45,61,0.12);
+            
+            /* Transitions */
+            --transition-fast: 150ms ease;
+            --transition-normal: 250ms ease;
+        }
+        
+        /* RESET */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Lexend', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        /* ============================================
+           NAVBAR
+           ============================================ */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.98);
+            border-bottom: 1px solid var(--border-light);
+            z-index: 1000;
+            backdrop-filter: blur(8px);
+        }
+        
+        .nav-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 var(--space-xl);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 72px;
+        }
+        
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+        
+        .nav-logo-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            background: linear-gradient(135deg, var(--mongo-green) 0%, var(--mongo-green-dark) 100%);
+            color: white;
+        }
+        
+        .nav-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .nav-title span {
+            color: var(--mongo-green-dark);
+        }
+        
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: var(--space-xs);
+        }
+        
+        .nav-menu a {
+            display: block;
+            padding: var(--space-sm) var(--space-md);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border-radius: var(--radius-sm);
+            transition: all var(--transition-fast);
+        }
+        
+        .nav-menu a:hover {
+            color: var(--mongo-green-dark);
+            background: var(--mongo-green-light);
+        }
+        
+        /* ============================================
+           HERO - Estilo MongoDB
+           ============================================ */
+        .hero {
+            padding: calc(72px + var(--space-3xl)) 0 var(--space-3xl);
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .hero-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 var(--space-xl);
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: var(--space-3xl);
+            align-items: center;
+        }
+        
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            background: var(--mongo-green-light);
+            border: 1px solid var(--mongo-green-muted);
+            padding: var(--space-xs) var(--space-md);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--mongo-green-darker);
+            margin-bottom: var(--space-md);
+        }
+        
+        .hero-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--mongo-green);
+            border-radius: 50%;
+        }
+        
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: var(--space-lg);
+            color: var(--text-primary);
+        }
+        
+        .hero-title .accent {
+            color: var(--mongo-green-dark);
+            position: relative;
+        }
+        
+        .hero-title .accent::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: rgba(19, 170, 82, 0.2);
+            z-index: -1;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: var(--space-xl);
+            line-height: 1.7;
+            max-width: 540px;
+        }
+        
+        .hero-actions {
+            display: flex;
+            gap: var(--space-md);
+            margin-bottom: var(--space-xl);
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: 14px 28px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            text-decoration: none;
+            transition: all var(--transition-fast);
+            font-size: 0.95rem;
+        }
+        
+        .btn-primary {
+            background: var(--mongo-green);
+            color: white;
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background: var(--mongo-green-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 237, 100, 0.35);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: var(--text-primary);
+            border: 1px solid var(--border-medium);
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--mongo-green-dark);
+            color: var(--mongo-green-dark);
+        }
+        
+        .hero-stats {
+            display: flex;
+            gap: var(--space-xl);
+            padding: var(--space-lg);
+            background: white;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .stat {
+            text-align: center;
+            padding: 0 var(--space-lg);
+            border-right: 1px solid var(--border-light);
+        }
+        
+        .stat:last-child {
+            border-right: none;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--mongo-green-dark);
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: var(--space-xs);
+        }
+        
+        .hero-diagram {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--space-lg);
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-md);
+        }
+        
+        /* ============================================
+           SECTIONS
+           ============================================ */
+        .section {
+            padding: var(--space-3xl) var(--space-xl);
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+        
+        .section-dark {
+            background: var(--bg-dark);
+            padding: var(--space-3xl) var(--space-xl);
+        }
+        
+        .section-dark .section-header h2,
+        .section-dark .section-header p,
+        .section-dark h3 {
+            color: white;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: var(--space-2xl);
+        }
+        
+        .section-header h2 {
+            font-size: 2.2rem;
+            color: var(--text-primary);
+            margin-bottom: var(--space-sm);
+        }
+        
+        .section-header h2 i {
+            color: var(--mongo-green);
+        }
+        
+        .section-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+        
+        .section-divider {
+            height: 1px;
+            background: var(--border-light);
+            margin: var(--space-2xl) 0;
+            max-width: 1280px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0 var(--space-xl);
+        }
+        
+        /* ============================================
+           CARDS
+           ============================================ */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-lg);
+        }
+        
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-lg);
+        }
+        
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--space-lg);
+        }
+        
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            border: 1px solid var(--border-light);
+            transition: all var(--transition-normal);
+        }
+        
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--mongo-green-muted);
+        }
+        
+        .card-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--mongo-green) 0%, var(--mongo-green-dark) 100%);
+            color: white;
+        }
+        
+        .card h3 {
+            font-size: 1.15rem;
+            color: var(--text-primary);
+            margin-bottom: var(--space-sm);
+        }
+        
+        .card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: var(--space-md);
+            line-height: 1.6;
+        }
+        
+        .card code {
+            display: inline-block;
+            font-size: 0.8rem;
+            color: var(--mongo-green-dark);
+            font-family: 'Fira Code', monospace;
+            background: var(--mongo-green-light);
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: var(--radius-sm);
+        }
+        
+        /* ============================================
+           BADGES
+           ============================================ */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .badge-go { background: #00ADD8; color: white; }
+        .badge-rust { background: #DEA584; color: #1E2D3D; }
+        .badge-angular { background: #DD0031; color: white; }
+        .badge-tauri { background: #FFC131; color: #1E2D3D; }
+        .badge-flutter { background: #02569B; color: white; }
+        .badge-gdoc { background: var(--mongo-green); color: white; }
+        .badge-app { background: var(--accent-blue); color: white; }
+        
+        /* ============================================
+           TABS
+           ============================================ */
+        .tabs {
+            display: flex;
+            gap: var(--space-xs);
+            background: var(--bg-tertiary);
+            padding: var(--space-xs);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-lg);
+        }
+        
+        .tab-btn {
+            padding: var(--space-sm) var(--space-lg);
+            background: transparent;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all var(--transition-fast);
+        }
+        
+        .tab-btn:hover {
+            background: white;
+            color: var(--mongo-green-dark);
+        }
+        
+        .tab-btn.active {
+            background: white;
+            color: var(--mongo-green-dark);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* ============================================
+           CODE BLOCKS - Dracula Light
+           ============================================ */
+        .code-block {
+            background: #282c34;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            margin: var(--space-lg) 0;
+        }
+        
+        .code-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space-sm) var(--space-md);
+            background: #21252b;
+            border-bottom: 1px solid #181a1f;
+        }
+        
+        .code-lang {
+            font-size: 0.8rem;
+            color: var(--mongo-green);
+            font-weight: 500;
+        }
+        
+        .code-block pre {
+            margin: 0;
+            padding: var(--space-lg);
+            overflow-x: auto;
+        }
+        
+        .code-block code {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            color: #abb2bf;
+        }
+        
+        .code-block .comment { color: #5c6370; font-style: italic; }
+        .code-block .keyword { color: #c678dd; }
+        .code-block .string { color: #98c379; }
+        .code-block .function { color: #61afef; }
+        .code-block .variable { color: #e06c75; }
+        .code-block .number { color: #d19a66; }
+        .code-block .prompt { color: var(--mongo-green); font-weight: 600; }
+        .code-block .cmd { color: #e5c07b; }
+        
+        /* ============================================
+           INFO BOXES
+           ============================================ */
+        .info-box {
+            display: flex;
+            gap: var(--space-md);
+            padding: var(--space-lg);
+            border-radius: var(--radius-md);
+            margin: var(--space-lg) 0;
+            border-left: 4px solid;
+        }
+        
+        .info-box i {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        .info-box.success {
+            background: var(--mongo-green-light);
+            border-color: var(--mongo-green);
+            color: var(--mongo-green-darker);
+        }
+        
+        .info-box.info {
+            background: #E3F2FD;
+            border-color: var(--accent-blue);
+            color: #1565C0;
+        }
+        
+        .info-box.warning {
+            background: #FFF3E0;
+            border-color: var(--accent-orange);
+            color: #E65100;
+        }
+        
+        /* ============================================
+           TABLES
+           ============================================ */
+        .table-container {
+            overflow-x: auto;
+            border-radius: var(--radius-md);
+            background: white;
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: var(--space-md) var(--space-lg);
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        th {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover td {
+            background: var(--mongo-green-light);
+        }
+        
+        td code {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            color: var(--mongo-green-dark);
+        }
+        
+        /* ============================================
+           ACCORDIONS
+           ============================================ */
+        .accordion {
+            background: white;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .accordion-item {
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .accordion-item:last-child {
+            border-bottom: none;
+        }
+        
+        .accordion-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space-lg);
+            cursor: pointer;
+            background: white;
+            border: none;
+            width: 100%;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: background var(--transition-fast);
+        }
+        
+        .accordion-header:hover {
+            background: var(--mongo-green-light);
+        }
+        
+        .accordion-header i {
+            transition: transform var(--transition-fast);
+            color: var(--mongo-green);
+        }
+        
+        .accordion-item.open .accordion-header i {
+            transform: rotate(180deg);
+        }
+        
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height var(--transition-normal);
+        }
+        
+        .accordion-item.open .accordion-content {
+            max-height: 1000px;
+        }
+        
+        .accordion-body {
+            padding: 0 var(--space-lg) var(--space-lg);
+            color: var(--text-secondary);
+        }
+        
+        /* ============================================
+           TIMELINE
+           ============================================ */
+        .timeline {
+            position: relative;
+            padding-left: var(--space-2xl);
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, var(--mongo-green) 0%, var(--mongo-green-dark) 100%);
+            border-radius: 3px;
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-bottom: var(--space-xl);
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: calc(-1 * var(--space-2xl) - 6px);
+            top: 4px;
+            width: 15px;
+            height: 15px;
+            background: var(--mongo-green);
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px var(--mongo-green);
+        }
+        
+        .timeline-date {
+            font-size: 0.85rem;
+            color: var(--mongo-green-dark);
+            font-weight: 600;
+            margin-bottom: var(--space-xs);
+        }
+        
+        .timeline-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
+        }
+        
+        .timeline-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        /* ============================================
+           SKILL TAGS
+           ============================================ */
+        .skill-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-sm);
+            margin-top: var(--space-md);
+        }
+        
+        .skill-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-xs);
+            padding: var(--space-xs) var(--space-sm);
+            background: var(--mongo-green-light);
+            color: var(--mongo-green-darker);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        /* ============================================
+           DIAGRAMS
+           ============================================ */
+        .diagram-container {
+            background: #282c34;
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            position: relative;
+        }
+        
+        .diagram-container:hover {
+            transform: scale(1.01);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+        
+        .diagram-container::after {
+            content: '\f00e';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            top: var(--space-md);
+            right: var(--space-md);
+            color: rgba(255,255,255,0.5);
+            font-size: 1.2rem;
+            transition: color var(--transition-fast);
+        }
+        
+        .diagram-container:hover::after {
+            color: white;
+        }
+        
+        .diagram-container h4 {
+            color: white;
+            margin-bottom: var(--space-md);
+        }
+        
+        .diagram-container pre {
+            margin: 0;
+        }
+        
+        .diagram-svg {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .diagram-svg svg {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        /* ============================================
+           LIGHTBOX / MODAL
+           ============================================ */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-xl);
+        }
+        
+        .lightbox.active {
+            display: flex;
+        }
+        
+        .lightbox-content {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: auto;
+            position: relative;
+        }
+        
+        .lightbox-close {
+            position: absolute;
+            top: var(--space-md);
+            right: var(--space-md);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg-tertiary);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            transition: all var(--transition-fast);
+        }
+        
+        .lightbox-close:hover {
+            background: var(--accent-red);
+            color: white;
+        }
+        
+        .lightbox-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+            padding-right: 50px;
+        }
+        
+        .lightbox-diagram {
+            background: #282c34;
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+        }
+        
+        .lightbox-hint {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: var(--space-md);
+            text-align: center;
+        }
+        
+        /* ============================================
+           FOOTER
+           ============================================ */
+        .footer {
+            background: var(--bg-dark);
+            color: white;
+            padding: var(--space-3xl) var(--space-xl);
+        }
+        
+        .footer-content {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: var(--space-2xl);
+        }
+        
+        .footer-brand i {
+            font-size: 2.5rem;
+            color: var(--mongo-green);
+            margin-bottom: var(--space-md);
+        }
+        
+        .footer-brand h4 {
+            color: white;
+            margin-bottom: var(--space-sm);
+        }
+        
+        .footer-brand p {
+            color: #8B9DAF;
+            font-size: 0.9rem;
+        }
+        
+        .footer h4 {
+            color: var(--mongo-green);
+            margin-bottom: var(--space-md);
+            font-size: 1rem;
+        }
+        
+        .footer ul {
+            list-style: none;
+        }
+        
+        .footer li {
+            margin-bottom: var(--space-sm);
+        }
+        
+        .footer a {
+            color: #8B9DAF;
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+        
+        .footer a:hover {
+            color: var(--mongo-green);
+        }
+        
+        .footer code {
+            background: rgba(0, 237, 100, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: var(--mongo-green);
+        }
+        
+        .footer-bottom {
+            max-width: 1280px;
+            margin: var(--space-xl) auto 0;
+            padding-top: var(--space-lg);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+            color: #8B9DAF;
+            font-size: 0.9rem;
+        }
+        
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 1024px) {
+            .hero-container {
+                grid-template-columns: 1fr;
+                gap: var(--space-2xl);
+            }
+            
+            .hero-diagram {
+                display: none;
+            }
+            
+            .grid-4, .grid-3 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: var(--space-xl);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+            
+            .hero-title {
+                font-size: 2.2rem;
+            }
+            
+            .hero-stats {
+                flex-wrap: wrap;
+                gap: var(--space-md);
+            }
+            
+            .stat {
+                border-right: none;
+                padding: var(--space-sm) var(--space-md);
+            }
+            
+            .grid-2, .grid-3, .grid-4 {
+                grid-template-columns: 1fr;
+            }
+            
+            .section {
+                padding: var(--space-2xl) var(--space-md);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="nav-logo-icon">
+                    <i class="fas fa-industry"></i>
+                </div>
+                <span class="nav-title">Sandra<span>Factory</span></span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#inicio">Inicio</a></li>
+                <li><a href="#factory">Factory</a></li>
+                <li><a href="#ecosystem">Ecosystem</a></li>
+                <li><a href="#products">Products</a></li>
+                <li><a href="#comandos">Comandos</a></li>
+                <li><a href="#agentes">Agentes</a></li>
+                <li><a href="#legal">Legal</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section id="inicio" class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="hero-badge">Fábrica de Software - v1.0.0</div>
+                <h1 class="hero-title">
+                    <span class="accent">Sandra</span>Factory
+                </h1>
+                <p class="hero-subtitle">
+                    Plataforma integral de gestión de código para el ecosistema Sandra.
+                    12 proyectos · 5 tecnologías · 14 agentes especializados
+                </p>
+                <div class="hero-actions">
+                    <a href="#comandos" class="btn btn-primary">
+                        <i class="fas fa-terminal"></i> Ver Comandos
+                    </a>
+                    <a href="#factory" class="btn btn-secondary">
+                        <i class="fas fa-project-diagram"></i> Explorar
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-number">12</span>
+                        <span class="stat-label">Proyectos</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">5</span>
+                        <span class="stat-label">Tecnologías</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">14</span>
+                        <span class="stat-label">Agentes</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">6</span>
+                        <span class="stat-label">Skills</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-diagram" data-mermaid="flowchart TB
+    SF[/🎼 SandraFactory/]
+    subgraph ECOSYSTEM[📦 ECOSYSTEM]
+        SV[(Server Go)]
+        SN[(Sentinel Rust)]
+        CO[[Console Angular]]
+        DT[[Desktop Tauri]]
+    end
+    subgraph PRODUCTS[📂 PRODUCTS]
+        BV[BDV gdoc]
+        BF[BANFANB]
+        MP[MPPD gdoc]
+        IF[IPSFA SSSIFANB]
+        IW[IPSFA app_web]
+        EJ[Ejército gdoc]
+    end
+    subgraph CONTAB[📊 CONTABAPP]
+        CT[(Contab ERP)]
+    end
+    subgraph DOCS[📚 DOCUMENTOS]
+        MD[(Manuales LaTeX)]
+    end
+    SF --> ECOSYSTEM
+    SF --> PRODUCTS
+    SF --> CONTAB
+    SF --> DOCS
+    SV <-.-> SN
+    CO -.-> SV
+    DT -.-> SV
+    style SF fill:#00ED64,stroke:#13AA52,stroke-width:3px
+    style ECOSYSTEM fill:#E8F5E9,stroke:#13AA52
+    style PRODUCTS fill:#E3F2FD,stroke:#0069CA
+    style CONTAB fill:#FFF3E0,stroke:#F9690E
+    style DOCS fill:#F3E5F5,stroke:#7B1FA2" onclick="openLightbox(this, 'Arquitectura General SandraFactory')">
+                <h4 style="color: white; margin-bottom: 1rem;"><i class="fas fa-project-diagram"></i> Arquitectura General (clic para ampliar)</h4>
+                <div class="diagram-svg"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SANDRA FACTORY -->
+    <section id="factory" class="section">
+        <div class="section-header">
+            <h2><i class="fas fa-industry"></i> SandraFactory</h2>
+            <p>Agente padre que orquesta la fábrica de software completa</p>
+        </div>
+        
+        <div class="info-box success">
+            <i class="fas fa-check-circle"></i>
+            <div>
+                <strong>SandraFactory</strong> es el sistema centralizado de gestión que coordina todos los proyectos 
+                del ecosistema. Gestiona sincronización, estados, análisis de código, respaldos y documentación 
+                de manera unificada. Compatible con Bash 3.2+ (macOS) y proporciona una interfaz unificada 
+                para administrar los 12 proyectos de la fábrica.
+            </div>
+        </div>
+        
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-sync"></i>
+                </div>
+                <h3>Sincronización Inteligente</h3>
+                <p>Gestiona git remotos de 12 proyectos con una sola línea de comando. Soporta categorías, proyectos individuales y filtros avanzados. Ejecuta add, commit, push y pull de forma automatizada.</p>
+                <code>sandra-factory sync ecosystem</code>
+                <div class="skill-tags">
+                    <span class="skill-tag"><i class="fas fa-code-branch"></i> Git</span>
+                    <span class="skill-tag"><i class="fas fa-shield-alt"></i> Zero-Trust</span>
+                    <span class="skill-tag"><i class="fas fa-history"></i> Historial</span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <h3>Monitoreo Completo</h3>
+                <p>Métricas detalladas: git status (branch, ahead/behind), líneas de código por lenguaje, documentación (README, CHANGELOG), estado de backups y análisis de rendimiento.</p>
+                <code>sandra-status --compact</code>
+                <div class="skill-tags">
+                    <span class="skill-tag"><i class="fas fa-code"></i> LOC</span>
+                    <span class="skill-tag"><i class="fas fa-file-alt"></i> Docs</span>
+                    <span class="skill-tag"><i class="fas fa-tachometer-alt"></i> Perf</span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-archive"></i>
+                </div>
+                <h3>Respaldo Automatizado</h3>
+                <p>Backups comprimidos (tar.gz) por categoría con exclusión inteligente de node_modules, .git, target, dist y archivos temporales. Ubicación: $HOME/backup_sandra/</p>
+                <code>sandra-factory backup all</code>
+                <div class="skill-tags">
+                    <span class="skill-tag"><i class="fas fa-file-archive"></i> tar.gz</span>
+                    <span class="skill-tag"><i class="fas fa-calendar"></i> Cron</span>
+                    <span class="skill-tag"><i class="fas fa-history"></i> Versiones</span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h3>Sistema de Agentes IA</h3>
+                <p>14 agentes especializados organizados jerárquicamente: 1 padre (SANDRA_FACTORY), 4 ecosystem (server, sentinel, console, desktop), 6 products (bdv, banfan, mppd, ipsfa, ipsfa_web, ejercito), skills compartidas.</p>
+                <code>orquestador/agents/</code>
+                <div class="skill-tags">
+                    <span class="skill-tag"><i class="fas fa-robot"></i> AI</span>
+                    <span class="skill-tag"><i class="fas fa-layer-group"></i> Hierarchy</span>
+                    <span class="skill-tag"><i class="fas fa-cogs"></i> Skills</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section-divider"></div>
+        
+        <h3 style="color: var(--text-primary); margin-bottom: var(--space-lg);">Flujo de Operación</h3>
+        
+        <div class="diagram-container" data-mermaid="flowchart LR
+    subgraph CLI[Terminal]
+        CMD[sandra-factory<br/>sandra-status<br/>sandra-sync]
+    end
+    
+    subgraph CORE[Orquestador]
+        SYN[Sincronización]
+        STA[Estado]
+        ANA[Análisis]
+        BAC[Backup]
+    end
+    
+    subgraph REPO[Repositorios]
+        G[(git)]
+        S3[(Backup)]
+    end
+    
+    CMD --> CORE
+    CORE --> SYN
+    CORE --> STA
+    CORE --> ANA
+    CORE --> BAC
+    SYN --> G
+    STA --> G
+    BAC --> S3
+    
+    style CLI fill:#E3F2FD,stroke:#0069CA
+    style CORE fill:#E8F5E9,stroke:#13AA52
+    style REPO fill:#FFF3E0,stroke:#F9690E
+    style CMD fill:#fff,stroke:#0069CA
+    style SYN fill:#fff,stroke:#13AA52
+    style STA fill:#fff,stroke:#13AA52
+    style ANA fill:#fff,stroke:#13AA52
+    style BAC fill:#fff,stroke:#13AA52" onclick="openLightbox(this, 'Flujo de Operación - SandraFactory')">
+            <h4 style="color: white; margin-bottom: 1rem;"><i class="fas fa-cogs"></i> Flujo de Operación (clic para ampliar)</h4>
+            <div class="diagram-svg"></div>
+        </div>
+        
+        <div class="section-divider"></div>
+        
+        <h3 style="color: var(--text-primary); margin-bottom: var(--space-lg);">Jerarquía de Agentes</h3>
+        
+        <div class="diagram-container" data-mermaid="graph TB
+    SF[/🎼 SANDRA FACTORY/]
+    
+    SF --> EC[📦 ECOSYSTEM]
+    SF --> PR[📂 PRODUCTS]
+    SF --> CA[📊 CONTABAPP]
+    SF --> MN[📚 MANUALES]
+    
+    subgraph EC2[4 Sub-Agentes]
+        SV1[server.md]
+        SN1[sentinel.md]
+        CO1[console.md]
+        DT1[desktop.md]
+    end
+    
+    subgraph PR2[7 Sub-Agentes]
+        BV1[bdv.md]
+        BF1[banfan.md]
+        MP1[mppd.md]
+        IF1[ipsfa_main.md]
+        IW1[ipsfa_web.md]
+        EJ1[ejercito.md]
+        CT1[contabapp.md]
+    end
+    
+    EC --> EC2
+    PR --> PR2
+    CA --> CT1
+    MN --> DOC1[(SANDRA_SKILLS.md)]
+    
+    style SF fill:#00ED64,stroke:#13AA52,color:#fff,stroke-width:3px
+    style EC fill:#13AA52,color:#fff
+    style PR fill:#0069CA,color:#fff
+    style CA fill:#F9690E,color:#fff
+    style MN fill:#7B1FA2,color:#fff
+    style EC2 fill:#E8F5E9,stroke:#13AA52
+    style PR2 fill:#E3F2FD,stroke:#0069CA
+    style DOC1 fill:#F3E5F5,stroke:#7B1FA2,roundRadius:10" onclick="openLightbox(this, 'Jerarquía de Agentes - SandraFactory')">
+            <h4 style="color: white; margin-bottom: 1rem;"><i class="fas fa-sitemap"></i> Jerarquía de Agentes (clic para ampliar)</h4>
+            <div class="diagram-svg"></div>
+        </div>
+    </section>
+
+    <!-- ECOSYSTEM -->
+    <section id="ecosystem" class="section" style="background: var(--bg-secondary);">
+        <div class="section-header">
+            <h2><i class="fas fa-server"></i> SandraEcosystem</h2>
+            <p>Núcleo de la plataforma - 4 proyectos fundamentales</p>
+        </div>
+        
+        <div class="grid-4">
+            <div class="card">
+                <div class="card-icon" style="background: #00ADD8;">
+                    <i class="fab fa-golang"></i>
+                </div>
+                <h3>Sandra Server</h3>
+                <p>Middleware/ESB con arquitectura Zero-Trust. Conecta aplicaciones distribuidas, maneja WebSockets (WSHub), gestión documental (ModulosAPP), seguridad AES-256 y gRPC con Sentinel.</p>
+                <p style="margin-top: var(--space-sm); font-size: 0.85rem; color: var(--text-muted);"><strong>Puertos:</strong> 80, 443, 8443</p>
+                <code>go/sandra/</code>
+                <div class="skill-tags">
+                    <span class="badge badge-go">Go 1.24.3</span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-icon" style="background: #DEA584;">
+                    <i class="fas fa-bolt" style="color: #1E2D3D;"></i>
+                </div>
+                <h3>Sandra Sentinel</h3>
+                <p>Motor de cálculo estocástico-determinista para nóminas masivas. Arquitectura hexagonal (Ports & Adapters), usa Tokio runtime y Protobuf v3 para gRPC.</p>
+                <p style="margin-top: var(--space-sm); font-size: 0.85rem; color: var(--text-muted);"><strong>Puerto:</strong> 50051 (gRPC)</p>
+                <code>rust/sandra.sentinel/</code>
+                <div class="skill-tags">
+                    <span class="badge badge-rust">Rust 2021</span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-icon" style="background: #DD0031;">
+                    <i class="fab fa-angular"></i>
+                </div>
+                <h3>Sandra Console</h3>
+                <p>Panel administrativo con Angular Standalone Components. Módulos: Login, Principal, Redes, Herramientas, Aplicaciones, Seguridad.</p>
+                <p style="margin-top: var(--space-sm); font-size: 0.85rem; color: var(--text-muted);"><strong>Puerto dev:</strong> 4200</p>
+                <code>angular/code-epic.io/v2consola/</code>
+                <div class="skill-tags">
+                    <span class="badge badge-angular">Angular 16+</span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-icon" style="background: #FFC131;">
+                    <i class="fas fa-desktop" style="color: #1E2D3D;"></i>
+                </div>
+                <h3>Sandra Desktop</h3>
+                <p>Contenedor desktop combinando Rust backend + Angular frontend. SQLite Cipher con AES-256-GCM encryption y sistema "Alquimia Invisible".</p>
+                <code>rust/sandra-desktop-container/</code>
+                <div class="skill-tags">
+                    <span class="badge badge-tauri">Tauri 2.0</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="diagram-container" style="margin-top: var(--space-xl);" data-mermaid="sequenceDiagram
+    autonumber
+    participant U as Usuario
+    participant C as Console
+    participant S as Server
+    participant SN as Sentinel
+    participant D as Desktop
+    
+    rect rgb(232, 245, 233)
+    U->>C: 1. Solicita acceso
+    C->>S: 2. Login/autenticación
+    S-->>C: 3. Token de sesión
+    end
+    
+    rect rgb(227, 241, 243)
+    C->>S: 4. Solicitud REST API
+    S->>SN: 5. Solicitud cálculo (gRPC :50051)
+    SN-->>S: 6. Resultado nómina
+    S-->>C: 7. Respuesta JSON
+    C-->>U: 8. Mostrar datos
+    end
+    
+    rect rgb(255, 243, 224)
+    D->>S: 9. Sincronización
+    S-->>D: 10. Datos locales
+    D->>S: 11. Guardar cambios
+    end
+    
+    Note over S,SN: Motor de cálculo implementa<br/>Ley del Seguro Social (Gaceta 6.209)" onclick="openLightbox(this, 'Arquitectura de Comunicación - SandraEcosystem')">
+            <h4 style="color: white; margin-bottom: 1rem;"><i class="fas fa-exchange-alt"></i> Arquitectura de Comunicación (clic para ampliar)</h4>
+            <div class="diagram-svg"></div>
+        </div>
+    </section>
+
+    <!-- PRODUCTS -->
+    <section id="products" class="section">
+        <div class="section-header">
+            <h2><i class="fas fa-briefcase"></i> SandraProducts</h2>
+            <p>Organismos gubernamentales - 6 proyectos especializados</p>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Organismo</th>
+                        <th>Tipo</th>
+                        <th>Ruta</th>
+                        <th>Tech</th>
+                        <th>Módulos/Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>BDV</strong><br/><small>Banco de Venezuela</small></td>
+                        <td><span class="badge badge-gdoc">gdoc</span></td>
+                        <td><code>bdv/gdoc.proceedings/</code></td>
+                        <td>Angular 13+</td>
+                        <td>Expedientes documentales, flujo de aprobación, plantilla Argon</td>
+                    </tr>
+                    <tr>
+                        <td><strong>BANFANB</strong><br/><small>Banco FANB</small></td>
+                        <td><span class="badge badge-gdoc">gdoc</span></td>
+                        <td><code>banfanb/fideicomiso/</code></td>
+                        <td>Angular 13+</td>
+                        <td>Dashboard fideicomisos, estadísticas, gestión patrimonial</td>
+                    </tr>
+                    <tr>
+                        <td><strong>MPPD</strong><br/><small>Ministerio Defensa</small></td>
+                        <td><span class="badge badge-gdoc">gdoc</span></td>
+                        <td><code>mppd/gdoc/</code></td>
+                        <td>Angular 13+</td>
+                        <td>Control documental ministerial, archivos, circulares</td>
+                    </tr>
+                    <tr>
+                        <td><strong>IPSFA SSSIFANB</strong><br/><small>Previsión Social FANB</small></td>
+                        <td><span class="badge badge-app">app_web</span></td>
+                        <td><code>ipsfa/sssifanb/</code></td>
+                        <td>Angular 13+</td>
+                        <td>Afiliación, Prestaciones Sociales, Nómina Pensionados, Indicadores</td>
+                    </tr>
+                    <tr>
+                        <td><strong>IPSFA app_web</strong><br/><small>Servicios Web</small></td>
+                        <td><span class="badge badge-app">app_web</span></td>
+                        <td><code>ipsfa/app_web_ipsfa/</code></td>
+                        <td>Angular 13+</td>
+                        <td>Constancias, Hoja de Ruta, Hoja de Vida, Medicamentos</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ejército</strong><br/><small>G. Documental</small></td>
+                        <td><span class="badge badge-gdoc">gdoc</span></td>
+                        <td><code>ejercito/gdoc.ejercito/</code></td>
+                        <td>Angular 13+</td>
+                        <td>Gestión documental castrense, archivos militares</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="info-box success" style="margin-top: var(--space-xl);">
+            <i class="fas fa-check-circle"></i>
+            <div>
+                <strong>Integración con SandraEcosystem:</strong> Todos los productos se autentican via Sandra Server (REST API) y utilizan Sandra Sentinel para cálculos de nóminas y pensiones según la Ley del Seguro Social (Gaceta 6.209).
+            </div>
+        </div>
+    </section>
+
+    <!-- COMANDOS -->
+    <section id="comandos" class="section" style="background: var(--bg-secondary);">
+        <div class="section-header">
+            <h2><i class="fas fa-terminal"></i> Comandos Disponibles</h2>
+            <p>Automatización completa de la fábrica de software</p>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('factory-cmd')">sandra-factory</button>
+            <button class="tab-btn" onclick="showTab('status-cmd')">sandra-status</button>
+            <button class="tab-btn" onclick="showTab('sync-cmd')">sandra-sync</button>
+            <button class="tab-btn" onclick="showTab('backup-cmd')">sandra-backup</button>
+        </div>
+        
+        <div id="factory-cmd" class="tab-content active">
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Bash</span>
+                </div>
+                <pre><code><span class="prompt">$</span> <span class="comment"># Sincronización de proyectos</span>
+<span class="cmd">sandra-factory sync all</span>              <span class="comment"># Todos los proyectos (12)</span>
+<span class="cmd">sandra-factory sync ecosystem</span>        <span class="comment"># Solo núcleo (4 proyectos)</span>
+<span class="cmd">sandra-factory sync products</span>         <span class="comment"># Solo organismos (6 proyectos)</span>
+<span class="cmd">sandra-factory sync contabapp</span>        <span class="comment"># Solo Flutter ERP</span>
+<span class="cmd">sandra-factory sync bdv</span>              <span class="comment"># Proyecto específico</span>
+
+<span class="comment"># Análisis de código</span>
+<span class="cmd">sandra-factory analyze all</span>           <span class="comment"># Análisis completo</span>
+<span class="cmd">sandra-factory analyze ecosystem</span>   <span class="comment"># Solo ecosistema</span>
+<span class="cmd">sandra-factory analyze bdv --loc</span>    <span class="comment"># Líneas de código</span>
+
+<span class="comment"># Listado y estado</span>
+<span class="cmd">sandra-factory list</span>                  <span class="comment"># Ver todos los proyectos</span>
+<span class="cmd">sandra-factory status ecosystem</span>     <span class="comment"># Estado ecosistema</span>
+
+<span class="comment"># Backup</span>
+<span class="cmd">sandra-factory backup all</span>            <span class="comment"># Backup completo</span>
+<span class="cmd">sandra-factory backup products</span>       <span class="comment"># Backup productos</span>
+
+<span class="comment"># Help</span>
+<span class="cmd">sandra-factory help</span>                 <span class="comment"># Ver ayuda completa</span></code></pre>
+            </div>
+        </div>
+        
+        <div id="status-cmd" class="tab-content">
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Bash</span>
+                </div>
+                <pre><code><span class="prompt">$</span> <span class="comment"># Estado de proyectos</span>
+<span class="cmd">sandra-status all</span>                    <span class="comment"># Todos los proyectos</span>
+<span class="cmd">sandra-status ecosystem</span>             <span class="comment"># Solo ecosistema</span>
+<span class="cmd">sandra-status products</span>              <span class="comment"># Solo productos</span>
+<span class="cmd">sandra-status server</span>                 <span class="comment"># Proyecto específico</span>
+<span class="cmd">sandra-status ipsfa</span>                   <span class="comment"># IPSFA SSSIFANB</span>
+
+<span class="comment"># Formatos de salida</span>
+<span class="cmd">sandra-status all --compact</span>        <span class="comment"># Vista compacta (tabla)</span>
+<span class="cmd">sandra-status all --json</span>           <span class="comment"># Salida JSON</span>
+<span class="cmd">sandra-status server --compact</span>      <span class="comment"># Server solo</span>
+
+<span class="comment"># Métricas recolectadas:</span>
+<span class="comment"># - Git: branch, ahead/behind, último commit</span>
+<span class="comment"># - Código: archivos, líneas por lenguaje</span>
+<span class="comment"># - Docs: README, CHANGELOG, LICENSE</span>
+<span class="comment"># - Backup: última fecha y tamaño</span>
+<span class="comment"># - Rendimiento: node_modules, dist, target</span></code></pre>
+            </div>
+        </div>
+        
+        <div id="sync-cmd" class="tab-content">
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Bash</span>
+                </div>
+                <pre><code><span class="prompt">$</span> <span class="comment"># Sincronización clásica (legacy)</span>
+<span class="cmd">sandra-sync all</span>                     <span class="comment"># Todos los proyectos</span>
+<span class="cmd">sandra-sync ecosystem</span>               <span class="comment"># Núcleo (server, sentinel, console, desktop)</span>
+<span class="cmd">sandra-sync server sentinel</span>         <span class="comment"># Proyectos específicos</span>
+<span class="cmd">sandra-sync products</span>                 <span class="comment"># Productos Angular</span>
+
+<span class="comment"># Modo update (solo pull, sin commit/push)</span>
+<span class="cmd">sandra-sync ecosystem -u</span>           <span class="comment"># Solo descargar cambios</span>
+<span class="cmd">sandra-sync server -u</span>              <span class="comment"># Solo actualizar server</span>
+
+<span class="comment"># Con mensaje personalizado</span>
+<span class="cmd">sandra-sync server -m "fix: corregir auth"</span>  <span class="comment"># Con commit message</span></code></pre>
+            </div>
+        </div>
+        
+        <div id="backup-cmd" class="tab-content">
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Bash</span>
+                </div>
+                <pre><code><span class="prompt">$</span> <span class="comment"># Backups por categoría</span>
+<span class="cmd">sandra-backup all</span>                   <span class="comment"># Completo (ecosystem + products + contabapp)</span>
+<span class="cmd">sandra-backup ecosystem</span>             <span class="comment"># Solo núcleo</span>
+<span class="cmd">sandra-backup products</span>              <span class="comment"># Solo organismos</span>
+<span class="cmd">sandra-backup flutter</span>              <span class="comment"># Solo Contab ERP</span>
+<span class="cmd">sandra-backup man</span>                   <span class="comment"># Solo manuales LaTeX</span>
+
+<span class="comment"># Ver backups existentes</span>
+<span class="cmd">sandra-backup list</span>                  <span class="comment"># Listar backups</span>
+
+<span class="comment"># Exclusiones automáticas:</span>
+<span class="comment"># node_modules, .git, target, dist, build</span>
+<span class="comment"># .angular, ios, android, *.log, .DS_Store</span>
+
+<span class="comment"># Destino: $HOME/backup_sandra/</span></code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- AGENTES -->
+    <section id="agentes" class="section">
+        <div class="section-header">
+            <h2><i class="fas fa-robot"></i> Sistema de Agentes IA</h2>
+            <p>14 agentes especializados organizados jerárquicamente</p>
+        </div>
+        
+        <div class="accordion">
+            <div class="accordion-item open">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span><i class="fas fa-crown" style="color: #F9690E;"></i> Agente Padre - SandraFactory</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <p><strong>Ubicación:</strong> <code>orquestador/agents/SANDRA_FACTORY.md</code></p>
+                        <p>Agente principal que orquesta toda la fábrica de software.</p>
+                        <div class="skill-tags">
+                            <span class="skill-tag"><i class="fas fa-coordination"></i> Orquestación</span>
+                            <span class="skill-tag"><i class="fas fa-tasks"></i> Gestión</span>
+                            <span class="skill-tag"><i class="fas fa-chart-line"></i> Métricas</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span><i class="fas fa-layer-group" style="color: var(--mongo-green);"></i> ECOSYSTEM - Sub-Agentes (4)</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <p>server.md · sentinel.md · console.md · desktop.md</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span><i class="fas fa-briefcase" style="color: var(--accent-blue);"></i> PRODUCTS - Sub-Agentes (6)</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <p>bdv.md · banfan.md · mppd.md · ipsfa_main.md · ipsfa_web.md · ejercito.md · contabapp.md</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span><i class="fas fa-brain" style="color: var(--mongo-green);"></i> Skills (6)</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <p>go-expert.md · rust-expert.md · angular-expert.md · flutter-expert.md · latex-expert.md · SANDRA_SKILLS.md</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- LEGAL -->
+    <section id="legal" class="section" style="background: var(--bg-secondary);">
+        <div class="section-header">
+            <h2><i class="fas fa-balance-scale"></i> Marco Legal Venezuela</h2>
+            <p>Regulación de Tecnologías de Información y Software Libre</p>
+        </div>
+        
+        <div class="grid-2">
+            <div>
+                <h3 style="color: var(--text-primary); margin-bottom: var(--space-lg);">
+                    <i class="fas fa-scroll" style="color: var(--mongo-green);"></i> Leyes y Decretos
+                </h3>
+                
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-date">29 Diciembre 2015</div>
+                        <div class="timeline-title">Ley del Seguro Social Obligatorio</div>
+                        <div class="timeline-desc">
+                            <strong>Gaceta Oficial N° 6.209 Extraordinario.</strong><br/>
+                            Regula el sistema de pensiones y jubilaciones del sector público venezolano. 
+                            Define los regímenes RCP (Régimen de Cargo del Pensionado) y FCP (Familiares del Causante) 
+                            implementados en Sandra Sentinel.
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-date">28 Diciembre 2010</div>
+                        <div class="timeline-title">Ley de Infogobierno</div>
+                        <div class="timeline-desc">
+                            <strong>Decreto N° 7.664.</strong><br/>
+                            Establece los principios rectores para el uso de tecnologías de información en la 
+                            Administración Pública Nacional. Promueve el software libre y estándares abiertos.
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-date">2004</div>
+                        <div class="timeline-title">Ley de Patrimonio Cultural</div>
+                        <div class="timeline-desc">
+                            Protección del patrimonio documental digital del Estado. Aplicable a la gestión 
+                            documental (gdoc) de todos los organismos.
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-date">2006</div>
+                        <div class="timeline-title">Ley Especial contra Delitos Informáticos</div>
+                        <div class="timeline-desc">
+                            Protección de sistemas informáticos gubernamentales contra accesos no autorizados, 
+                            interceptación de comunicaciones y sabotaje de sistemas.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <h3 style="color: var(--text-primary); margin-bottom: var(--space-lg);">
+                    <i class="fas fa-shield-alt" style="color: var(--mongo-green);"></i> InfoGobierno
+                </h3>
+                
+                <div class="card">
+                    <h3>Principios Fundamentales</h3>
+                    <ul style="list-style: none; margin-top: var(--space-md);">
+                        <li style="margin-bottom: var(--space-md);">
+                            <i class="fas fa-check-circle" style="color: var(--mongo-green); margin-right: 8px;"></i> 
+                            <strong>Soberanía tecnológica</strong>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; margin-left: 24px;">
+                                Preferir soluciones desarrolladas en el país o con tecnologías libres
+                            </p>
+                        </li>
+                        <li style="margin-bottom: var(--space-md);">
+                            <i class="fas fa-check-circle" style="color: var(--mongo-green); margin-right: 8px;"></i> 
+                            <strong>Software libre</strong>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; margin-left: 24px;">
+                                Priorizar soluciones de código abierto con licencia libre
+                            </p>
+                        </li>
+                        <li style="margin-bottom: var(--space-md);">
+                            <i class="fas fa-check-circle" style="color: var(--mongo-green); margin-right: 8px;"></i> 
+                            <strong>Interoperabilidad</strong>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; margin-left: 24px;">
+                                Estándares abiertos para intercambio de datos entre sistemas
+                            </p>
+                        </li>
+                        <li style="margin-bottom: var(--space-md);">
+                            <i class="fas fa-check-circle" style="color: var(--mongo-green); margin-right: 8px;"></i> 
+                            <strong>Seguridad de la información</strong>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; margin-left: 24px;">
+                                Protección de datos personales de los ciudadanos
+                            </p>
+                        </li>
+                        <li style="margin-bottom: 0;">
+                            <i class="fas fa-check-circle" style="color: var(--mongo-green); margin-right: 8px;"></i> 
+                            <strong>Accesibilidad</strong>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; margin-left: 24px;">
+                                Inclusión digital y acceso universal a la información pública
+                            </p>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="info-box success" style="margin-top: var(--space-lg);">
+                    <i class="fas fa-check-circle"></i>
+                    <div>
+                        <strong>Cumplimiento SandraFactory:</strong> Todos los proyectos cumplen con los principios 
+                        de InfoGobierno, priorizando software libre (MIT, BSD-3, LPPL) y estándares abiertos (gRPC, REST API).
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- LIGHTBOX -->
+    <div id="diagram-lightbox" class="lightbox">
+        <div class="lightbox-content">
+            <button class="lightbox-close" onclick="closeLightbox()">
+                <i class="fas fa-times"></i>
+            </button>
+            <h3 id="lightbox-title" class="lightbox-title">Diagrama</h3>
+            <div id="lightbox-diagram" class="lightbox-diagram"></div>
+            <p class="lightbox-hint">Presiona ESC o haz clic fuera para cerrar</p>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <i class="fas fa-industry"></i>
+                <h4>SandraFactory</h4>
+                <p>Fábrica de Software<br>Versión 1.0.0 - 28/03/2026</p>
+            </div>
+            <div>
+                <h4>Enlaces</h4>
+                <ul>
+                    <li><a href="agents/SANDRA_FACTORY.md">Agente Padre</a></li>
+                    <li><a href="agents/ECOSYSTEM/">ECOSYSTEM</a></li>
+                    <li><a href="agents/PRODUCTS/">PRODUCTS</a></li>
+                    <li><a href="skills/">Skills</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>Comandos</h4>
+                <ul>
+                    <li><code>sandra-factory</code></li>
+                    <li><code>sandra-status</code></li>
+                    <li><code>sandra-sync</code></li>
+                    <li><code>sandra-backup</code></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>
+                <i class="fas fa-heart" style="color: var(--accent-red);"></i> 
+                Fábrica de Software Sandra - Construido con Software Libre
+            </p>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        // Configuración de Mermaid
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'base',
+            themeVariables: {
+                primaryColor: '#FFFFFF',
+                primaryTextColor: '#1E2D3D',
+                primaryBorderColor: '#13AA52',
+                lineColor: '#00ED64',
+                secondaryColor: '#F7F9FA',
+                tertiaryColor: '#EDF1F3'
+            }
+        });
+        
+        // Renderizar diagramas al cargar
+        document.addEventListener('DOMContentLoaded', async function() {
+            const diagramContainers = document.querySelectorAll('.diagram-container[data-mermaid], .hero-diagram[data-mermaid]');
+            
+            for (const container of diagramContainers) {
+                const mermaidCode = container.getAttribute('data-mermaid');
+                if (mermaidCode) {
+                    try {
+                        const id = 'mermaid-' + Math.random().toString(36).substr(2, 9);
+                        const { svg } = await mermaid.render(id, mermaidCode);
+                        container.querySelector('.diagram-svg').innerHTML = svg;
+                    } catch (e) {
+                        console.error('Error rendering mermaid:', e);
+                    }
+                }
+            }
+        });
+        
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        function toggleAccordion(header) {
+            header.parentElement.classList.toggle('open');
+        }
+        
+        // Lightbox para diagramas
+        let lightboxOpen = false;
+        
+        async function openLightbox(element, title) {
+            const mermaidCode = element.getAttribute('data-mermaid');
+            if (!mermaidCode) return;
+            
+            const lightbox = document.getElementById('diagram-lightbox');
+            const lightboxDiagram = document.getElementById('lightbox-diagram');
+            const lightboxTitle = document.getElementById('lightbox-title');
+            
+            // Mostrar loading
+            lightboxDiagram.innerHTML = '<div style="text-align:center;padding:2rem;color:#666;">Generando diagrama...</div>';
+            lightboxTitle.textContent = title;
+            
+            // Mostrar lightbox
+            lightbox.classList.add('active');
+            lightboxOpen = true;
+            document.body.style.overflow = 'hidden';
+            
+            // Renderizar en el lightbox
+            try {
+                const id = 'lightbox-mermaid-' + Date.now();
+                const { svg } = await mermaid.render(id, mermaidCode);
+                lightboxDiagram.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;min-height:300px;background:#282c34;border-radius:8px;padding:1rem;">' + svg + '</div>';
+            } catch (e) {
+                lightboxDiagram.innerHTML = '<div style="color:#ff5252;padding:2rem;">Error: ' + e.message + '</div>';
+            }
+        }
+        
+        function closeLightbox() {
+            const lightbox = document.getElementById('diagram-lightbox');
+            lightbox.classList.remove('active');
+            lightboxOpen = false;
+            document.body.style.overflow = '';
+        }
+        
+        // Cerrar con Escape o click fuera
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && lightboxOpen) {
+                closeLightbox();
+            }
+        });
+        
+        document.getElementById('diagram-lightbox').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeLightbox();
+            }
+        });
+    </script>
+</body>
+</html>

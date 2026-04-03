@@ -1,32 +1,64 @@
-/* --- Variables de Diseño (Paleta y Fuentes) --- */
+/* ============================================
+   SANDRA SERVER WIKI - TEMA MONGODB POTENCIADO
+   Inspirado en MongoDB.com con enhancements
+   ============================================ */
+
+/* --- Variables de Diseño --- */
 :root {
-  --font-family: 'Lexend', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* MongoDB Green Palette - Potenciado */
+  --mongo-green: #00ED64;
+  --mongo-green-dark: #13AA52;
+  --mongo-green-darker: #0B8945;
+  --mongo-green-light: #E8F5E9;
+  --mongo-green-glow: rgba(0, 237, 100, 0.15);
+  --mongo-green-glow-strong: rgba(0, 237, 100, 0.3);
   
-  --color-bg: #fdfcfb; /* Crema muy claro */
-  --color-bg-secondary: #ffffff;
-  --color-text: #334155; /* Gris pizarra oscuro */
-  --color-text-secondary: #94a3b8; /* Gris suave */
-  --color-accent: #a78bfa; /* Lavanda pastel */
-  --color-accent-hover: #8b5cf6; /* Lavanda más intenso */
-  --color-border: #f1f5f9; /* Gris extra claro */
-  --color-badge-bg: #f8fafc;
-  --color-badge-text: #64748b;
-  --color-shadow: rgba(149, 157, 165, 0.1);
-
-  /* --- Paleta Pastel para Bloques de Código (Estilo Editor) --- */
-  --code-bg: #f8fafc; /* Fondo gris muy claro */
-  --code-fg: #334155; /* Texto principal, más oscuro para contraste */
-  --code-comment: #94a3b8; /* Comentarios en gris suave */
-  --code-keyword: #8b5cf6; /* Palabras clave en lavanda */
-  --code-string: #10b981; /* Strings en verde esmeralda */
-  --code-function: #2563eb; /* Funciones en azul */
-  --code-punctuation: #64748b; /* Puntuación (brackets, etc.) en gris medio */
-
-  --border-radius: 10px;
-  --shadow: 0 8px 24px var(--color-shadow);
+  /* Fondos */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F7F9FA;
+  --bg-sidebar: #FFFFFF;
+  --bg-code: #0B8945;
+  
+  /* Texto */
+  --text-primary: #1E2D3D;
+  --text-secondary: #5F6B7A;
+  --text-muted: #8996A3;
+  
+  /* Bordes */
+  --border-light: #E6EBED;
+  --border-medium: #D0D7DE;
+  
+  /* Código - Dracula Theme */
+  --code-bg: #282a36;
+  --code-fg: #f8f8f2;
+  --code-comment: #6272a4;
+  --code-keyword: #ff79c6;
+  --code-string: #f1fa8c;
+  --code-function: #50fa7b;
+  --code-number: #bd93f9;
+  --code-operator: #ff79c6;
+  --code-punctuation: #f8f8f2;
+  --code-class: #8be9fd;
+  
+  /* Sombras */
+  --shadow-sm: 0 1px 3px rgba(30,45,61,0.08);
+  --shadow-md: 0 4px 12px rgba(30,45,61,0.1);
+  --shadow-lg: 0 8px 24px rgba(30,45,61,0.12);
+  --shadow-glow: 0 0 20px rgba(0, 237, 100, 0.2);
+  --shadow-glow-strong: 0 0 30px rgba(0, 237, 100, 0.35);
+  
+  /* Bordes redondeados */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  
+  /* Fuente */
+  --font-family: 'Lexend', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Fira Code', 'JetBrains Mono', monospace;
 }
 
-/* --- Reseteo y Estilos Base --- */
+/* --- Reset y Estilos Base --- */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -39,23 +71,44 @@ html {
 
 body {
   font-family: var(--font-family);
-  background-color: var(--color-bg);
-  color: var(--color-text);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* --- Scrollbar Personalizada --- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--mongo-green-dark);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--mongo-green);
+}
+
 /* --- Layout Principal --- */
 .layout {
   display: grid;
-  grid-template-columns: 300px 1fr;
+  grid-template-columns: 280px 1fr;
   min-height: 100vh;
+  background: var(--bg-secondary);
 }
 
+/* --- Sidebar --- */
 aside {
-  background-color: var(--color-bg-secondary);
-  border-right: 1px solid var(--color-border);
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-light);
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -64,14 +117,27 @@ aside {
   top: 0;
   height: 100vh;
   overflow-y: auto;
+  box-shadow: 2px 0 20px rgba(0, 237, 100, 0.05);
+}
+
+/* Borde izquierdo decorativo */
+aside::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--mongo-green) 0%, var(--mongo-green-dark) 100%);
 }
 
 main {
   padding: 2.5rem;
   position: relative;
+  background: var(--bg-secondary);
 }
 
-/* --- Componentes de la Barra Lateral (Aside) --- */
+/* --- Brand & Logo --- */
 .brand {
   display: flex;
   align-items: center;
@@ -79,70 +145,73 @@ main {
 }
 
 .logo {
-  background-color: var(--color-accent);
+  background: linear-gradient(135deg, var(--mongo-green) 0%, var(--mongo-green-dark) 100%);
   color: white;
   font-weight: 800;
-  font-size: 1.25rem;
+  font-size: 1rem;
   width: 48px;
   height: 48px;
   display: grid;
   place-content: center;
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-glow-strong);
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(0, 237, 100, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(0, 237, 100, 0.5);
+  }
 }
 
 .brand-name {
-  font-weight: 800;
+  font-weight: 700;
   font-size: 1.1rem;
   letter-spacing: 0.02em;
+  color: var(--text-primary);
 }
 
+/* --- Badge --- */
 .badge {
-  background-color: var(--color-badge-bg);
-  color: var(--color-badge-text);
-  font-size: 0.75rem;
-  padding: 0.2rem 0.5rem;
-  border-radius: 999px;
-  font-weight: 500;
+  background-color: var(--mongo-green-light);
+  color: var(--mongo-green-darker);
+  font-size: 0.7rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 20px;
+  font-weight: 600;
+  border: 1px solid var(--mongo-green);
+  display: inline-block;
+  margin-top: 2px;
 }
 
+/* --- Search --- */
 .search {
   position: relative;
 }
 
-/* Estilo específico para el icono de la lupa */
-.search > i[data-lucide="search"] {
-  position: absolute;
-  left: 0.85rem; /* Pequeño ajuste para centrarlo mejor en el padding */
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--color-text-secondary);
-  transition: color 0.3s;
-  width: 1rem;
-  height: 1rem;
-  pointer-events: none; /* Evita que el icono intercepte clics destinados al input */
-}
-
 .search input {
   width: 100%;
-  padding: 0.75rem 2.75rem; /* Padding simétrico para más aire */
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius);
-  background-color: var(--color-badge-bg); /* Un fondo ligeramente distinto */
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
   font-family: var(--font-family);
-  font-size: 0.95rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Transición más suave */
+  font-size: 0.9rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .search input:focus {
   outline: none;
-  border-color: var(--color-accent);
-  background-color: var(--color-bg-secondary); /* Fondo blanco al enfocar */
-  box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.15); /* Sombra de foco más sutil */
+  border-color: var(--mongo-green);
+  background: var(--bg-primary);
+  box-shadow: 0 0 0 3px var(--mongo-green-glow), var(--shadow-glow);
 }
 
-.search input:focus + .clear-search,
-.search input:focus ~ i[data-lucide="search"] {
-  color: var(--color-text);
+.search input::placeholder {
+  color: var(--text-muted);
 }
 
 .clear-search {
@@ -153,18 +222,22 @@ main {
   background: transparent;
   border: none;
   cursor: pointer;
-  color: var(--color-text-secondary);
+  color: var(--text-muted);
   padding: 0.25rem;
-  display: inline-flex; /* Usamos inline-flex para el botón */
-  opacity: 0; /* Oculto por defecto, se muestra con JS */
-  transition: opacity 0.2s, color 0.2s;
-}
-
-.clear-search.hidden {
+  display: inline-flex;
   opacity: 0;
-  pointer-events: none;
+  transition: opacity 0.2s;
 }
 
+.clear-search:not(.hidden) {
+  opacity: 1;
+}
+
+.clear-search:hover {
+  color: var(--mongo-green-dark);
+}
+
+/* --- Navigation --- */
 .nav {
   display: flex;
   flex-direction: column;
@@ -176,253 +249,85 @@ main {
 
 .nav summary {
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   cursor: pointer;
   padding: 0.6rem 0.75rem;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  letter-spacing: 0.03em;
-  color: var(--color-text);
-  transition: background-color 0.2s;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
 }
 
 .nav summary:hover {
-  background-color: var(--color-badge-bg);
+  background: var(--mongo-green-light);
+  color: var(--mongo-green-dark);
 }
 
 .nav summary i {
   width: 1rem;
   height: 1rem;
-  color: var(--color-text-secondary);
+  color: var(--mongo-green-dark);
 }
 
 .nav a {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
   text-decoration: none;
-  padding: 0.6rem 0.75rem 0.6rem 2.75rem;
-  border-radius: 8px;
-  font-size: 0.75rem;
-  transition: color 0.2s, background-color 0.2s, transform 0.2s;
+  padding: 0.6rem 0.75rem 0.6rem 2rem;
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
   position: relative;
 }
 
+.nav a::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 0;
+  background: var(--mongo-green);
+  border-radius: 0 2px 2px 0;
+  transition: height 0.2s ease;
+}
+
 .nav a:hover {
-  color: var(--color-text);
-  background-color: var(--color-badge-bg);
+  color: var(--mongo-green-dark);
+  background: var(--mongo-green-light);
   transform: translateX(4px);
 }
 
 .nav a.active {
-  color: var(--color-accent);
+  color: var(--mongo-green-darker);
   font-weight: 600;
-  background-color: #f5f3ff; /* Fondo lavanda muy claro */
+  background: var(--mongo-green-light);
+}
+
+.nav a.active::before {
+  height: 60%;
 }
 
 .nav a i {
   width: 1rem;
   height: 1rem;
   flex-shrink: 0;
-  /* El color del icono se hereda del color del texto del enlace */
   color: currentColor;
 }
 
-/* --- Contenido Principal (Main) --- */
+/* --- Main Content - Card --- */
 .card {
-  background-color: var(--color-bg-secondary);
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
+  background: var(--bg-primary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
   padding: 2.5rem 3rem;
   min-height: 80vh;
-}
-
-.footer {
-  text-align: center;
-  margin-top: 2rem;
-  font-size: 0.8rem;
-  color: var(--color-text-secondary);
-}
-
-/* --- Estilos de Contenido Dentro de .card --- */
-.section-title h1, .section h2 {
-  margin-bottom: 1.5rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  border-bottom: 1px solid var(--color-border);
-  padding-bottom: 0.5rem;
-}
-
-.section {
-  margin-bottom: 2rem;
-}
-
-.section p {
-  margin-bottom: 1rem;
-}
-
-.image-container {
-  text-align: center;
-  margin: 2rem 0;
-}
-
-.image-container img {
-  max-width: 100%;
-  height: auto;
-  border-radius: var(--border-radius);
-}
-
-.list-container ul {
-  list-style: none;
-  padding-left: 0;
-}
-
-.list-container li {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
-}
-
-.list-container li i {
-  color: var(--color-accent);
-  width: 1.25rem;
-  height: 1.25rem;
-  flex-shrink: 0;
-}
-
-/* --- Animaciones y Loader --- */
-.loader-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: absolute;
-  inset: 2.5rem; /* Alineado con el padding de main */
-  background-color: rgba(255, 255, 255, 0.8);
-  z-index: 10;
-  transition: opacity 0.3s;
-}
-
-.loader-wrapper.hidden {
-  display: none;
-}
-
-.spinner {
-  width: 48px;
-  height: 48px;
-  border: 5px solid var(--color-border);
-  border-bottom-color: var(--color-accent);
-  border-radius: 50%;
-  animation: rotation 1s linear infinite;
-}
-
-
-
-/* --- Estilos para Tablas (.minimal-table) --- */
-.minimal-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 2rem 0;
-  font-size: 0.85rem; /* Aumento ligero para mejorar legibilidad */
-  color: var(--color-text);
-  border-radius: var(--border-radius); /* Bordes redondeados para la tabla */
-  overflow: hidden; /* Asegura que el contenido se recorte con el border-radius */
-  box-shadow: var(--shadow); /* Sombra sutil para levantar la tabla */
-  background-color: var(--color-bg-secondary); /* Fondo predeterminado para las filas impares */
-}
-
-.minimal-table thead tr {
-  background-color: var(--color-border); /* Fondo más opaco para la cabecera */
-}
-
-.minimal-table th {
-  padding: 1rem 1.25rem;
-  text-align: left;
-  font-weight: 700; /* Mayor peso para destacar */
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  font-size: 0.75rem;
-  color: var(--color-text); /* Texto principal para un look más profundo y con contraste */
-  border-bottom: 2px solid #e2e8f0; /* Borde más oscuro y definido */
-}
-
-.minimal-table th i {
-  width: 18px; /* Iconos ligeramente más pequeños */
-  height: 18px;
-  margin-right: 1rem; /* Espacio entre icono y texto */
-  vertical-align: middle; /* Alineación vertical con el texto */
-  color: var(--color-accent); /* Color de acento para el icono */
-}
-
-.minimal-table tbody tr:nth-child(even) {
-  background-color: var(--color-badge-bg); /* Fondo para filas pares (zebra striping) */
-}
-
-.minimal-table td {
-  padding: 1rem 1.25rem;
-  border-bottom: 1px solid #e2e8f0; /* Líneas de fila sutiles pero visibles */
-  vertical-align: top;
-}
-
-/* Elimina el borde de la última fila para un acabado limpio */
-.minimal-table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-/* Da más peso a la primera columna para identificar el concepto */
-.minimal-table td:first-child {
-  font-weight: 500;
-}
-
-/* Ancho específico para la primera columna, como en el HTML original */
-.minimal-table th:first-child,
-.minimal-table td:first-child {
-  width: 250px;
-}
-
-.minimal-table tbody tr {
-  transition: background-color 0.2s ease-in-out;
-}
-
-.minimal-table tbody tr:hover {
-  background-color: rgba(167, 139, 250, 0.1); /* Resaltado suave con el color de acento */
-}
-
-/* Estilos para listas dentro de celdas de tabla */
-.minimal-table td ul {
-  list-style: none; /* Elimina los puntos predeterminados */
-  padding-left: 0;
-  margin-top: 0.5rem;
-  margin-bottom: 0;
-}
-
-.minimal-table td ul li {
-  position: relative;
-  padding-left: 1.2em; /* Espacio para el bullet personalizado */
-  margin-bottom: 0.4em;
-  line-height: 1.4;
-}
-
-.minimal-table td ul li::before {
-  content: '•'; /* Bullet personalizado */
-  color: var(--color-accent); /* Color de acento para el bullet */
-  position: absolute;
-  left: 0;
-  font-size: 1.2em;
-  line-height: 1;
-}
-
-/* Estilos para código dentro de celdas de tabla */
-.minimal-table td code {
-  font-family: var(--font-family-mono); /* Fuente monoespaciada */
-  background-color: var(--color-badge-bg); /* Fondo claro para el código */
-  padding: 0.2em 0.4em;
-  border-radius: 4px;
-  font-size: 0.85em;
-  color: var(--color-text);
+  border: 1px solid var(--border-light);
 }
 
 @keyframes rotation {
@@ -430,6 +335,214 @@ main {
   100% { transform: rotate(360deg); }
 }
 
+/* --- Tablas Estilo MongoDB --- */
+.minimal-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  background: var(--bg-primary);
+}
+
+.minimal-table thead tr {
+  background: linear-gradient(90deg, var(--mongo-green-light) 0%, #d4eddc 100%);
+}
+
+.minimal-table th {
+  padding: 1rem 1.25rem;
+  text-align: left;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: var(--mongo-green-darker);
+  border-bottom: 2px solid var(--mongo-green);
+}
+
+.minimal-table th i {
+  width: 18px;
+  height: 18px;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+  color: var(--mongo-green-dark);
+}
+
+.minimal-table tbody tr:nth-child(even) {
+  background: var(--bg-secondary);
+}
+
+.minimal-table tbody tr {
+  transition: all 0.2s ease;
+}
+
+.minimal-table tbody tr:hover {
+  background: var(--mongo-green-light);
+  box-shadow: inset 0 0 0 1px var(--mongo-green);
+}
+
+.minimal-table td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border-light);
+  vertical-align: top;
+}
+
+.minimal-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.minimal-table td:first-child {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.minimal-table th:first-child,
+.minimal-table td:first-child {
+  width: 250px;
+}
+
+/* Listas dentro de celdas */
+.minimal-table td ul {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
+
+.minimal-table td ul li {
+  position: relative;
+  padding-left: 1.2em;
+  margin-bottom: 0.4em;
+  line-height: 1.4;
+}
+
+.minimal-table td ul li::before {
+  content: '•';
+  color: var(--mongo-green-dark);
+  position: absolute;
+  left: 0;
+  font-size: 1.2em;
+  line-height: 1;
+}
+
+/* Código inline en tablas */
+.minimal-table td code {
+  font-family: var(--font-mono);
+  background: rgba(189, 147, 249, 0.15);
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-size: 0.85em;
+  color: var(--code-keyword);
+}
+
+/* --- Bloques de Código - Dracula Theme --- */
+.code-block {
+  background: var(--code-bg);
+  border-radius: var(--radius-lg);
+  border-left: 4px solid var(--code-keyword);
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  overflow-x: auto;
+  box-shadow: 0 4px 20px rgba(40, 42, 54, 0.3);
+  position: relative;
+}
+
+.code-block::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 28px;
+  background: linear-gradient(180deg, #44475a 0%, #282a36 100%);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  display: flex;
+  align-items: center;
+  padding-left: 12px;
+}
+
+.code-block::after {
+  content: '● ● ●';
+  position: absolute;
+  top: 8px;
+  left: 16px;
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.code-block pre {
+  margin: 0;
+  padding-top: 1rem;
+}
+
+.code-block code {
+  font-family: var(--font-mono);
+  color: var(--code-fg);
+  background: none;
+  padding: 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+/* Syntax highlighting para código - Dracula */
+.code-block code .keyword,
+.code-block code .selector,
+.code-block code .tag {
+  color: var(--code-keyword);
+  font-weight: 600;
+}
+
+.code-block code .string,
+.code-block code .attr-value {
+  color: var(--code-string);
+}
+
+.code-block code .function,
+.code-block code .method {
+  color: var(--code-function);
+}
+
+.code-block code .comment,
+.code-block code .doc {
+  color: var(--code-comment);
+  font-style: italic;
+}
+
+.code-block code .number,
+.code-block code .literal {
+  color: var(--code-number);
+}
+
+.code-block code .operator,
+.code-block code .punctuation {
+  color: var(--code-operator);
+}
+
+.code-block code .class,
+.code-block code .type {
+  color: var(--code-class);
+}
+
+.code-block code .variable,
+.code-block code .param {
+  color: var(--code-fg);
+}
+
+/* Código inline */
+code {
+  color: var(--code-keyword);
+  background: rgba(189, 147, 249, 0.15);
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+/* --- Fade In Animation --- */
 #content.fade-in {
   animation: fadeIn 0.4s ease-in-out;
 }
@@ -439,33 +552,54 @@ main {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* --- Estilos para Bloques de Código (Tema Dracula) --- */
-.code-block {
-  background-color: var(--code-bg);
-  border-radius: var(--border-radius);
-  border-top: 3px solid;
-  border-image: linear-gradient(to right, var(--code-keyword), var(--code-string)) 1;
-  padding: 1.5rem;
-  margin: 1.5rem 0;
-  overflow-x: auto;
-  box-shadow: var(--shadow);
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  
+  aside {
+    position: relative;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border-light);
+  }
+  
+  .card {
+    padding: 1.5rem;
+  }
+  
+  .minimal-table {
+    font-size: 0.75rem;
+  }
+  
+  .minimal-table th:first-child,
+  .minimal-table td:first-child {
+    width: auto;
+  }
 }
 
-.code-block pre {
-  margin: 0;
+/* --- Utilities --- */
+.text-mongo {
+  color: var(--mongo-green-dark);
 }
 
-.code-block code {
-  font-family: var(--font-family-mono);
-  color: var(--code-fg);
-  background: none;
-  padding: 0;
-  font-size: 0.875rem;
-  line-height: 1.6;
+.bg-mongo-light {
+  background: var(--mongo-green-light);
 }
 
-/* Estilo para código en línea (fuera de .code-block) */
-code {
-  color: var(--dracula-pink);
-  background-color: rgba(167, 139, 250, 0.1);
+.border-mongo {
+  border-color: var(--mongo-green);
+}
+
+/* --- Links --- */
+a {
+  color: var(--mongo-green-dark);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--mongo-green);
+  text-decoration: underline;
 }
