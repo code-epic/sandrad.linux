@@ -124,7 +124,7 @@
       }
     }
   </style>
-<link rel="stylesheet" href="styles-P56BSM77.css"></head>
+<link rel="stylesheet" href="styles-LWX3MAAN.css"></head>
 
 <body>
   <core-loading-screen id="loading-bg">
@@ -138,6 +138,24 @@
 
   <script>
     (function () {
+      // Polyfill de seguridad inmediata para $localize (ng-bootstrap / i18n)
+      if (typeof globalThis.$localize === 'undefined') {
+        globalThis.$localize = function (messageParts, ...expressions) {
+          let str = (messageParts && messageParts[0]) || '';
+          if (str.charAt(0) === ':') {
+            const secondColon = str.indexOf(':', 1);
+            if (secondColon !== -1) {
+              str = str.substring(secondColon + 1);
+            }
+          }
+          let res = str;
+          for (let i = 1; i < messageParts.length; i++) {
+            res += (expressions[i - 1] !== undefined ? expressions[i - 1] : '') + messageParts[i];
+          }
+          return res;
+        };
+      }
+
       // Configuración de temas
       const config = {
         default: {
@@ -198,6 +216,6 @@
 
 
 
-<script src="polyfills-ERLYOUQC.js" type="module"></script><script src="scripts-LCWUXXWM.js" defer></script><script src="main-EWDE6JMP.js" type="module"></script></body>
+<script src="polyfills-ERLYOUQC.js" type="module"></script><script src="scripts-LCWUXXWM.js" defer></script><script src="main-SA2SFXJ6.js" type="module"></script></body>
 
 </html>
